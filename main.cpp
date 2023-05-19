@@ -25,6 +25,10 @@
  *
  * Reading More In The Next Source File
  *
+ * My namespace for public stl::
+ * Recommended to use stl::
+ * for Private Implementation __std__::
+ *
  * Finish on : Unknown
  * Report Bug Here :
  *
