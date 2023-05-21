@@ -9,6 +9,7 @@
 
 #include "../util/ctt.h"
 
+/// Declare of Inner Private Function
 namespace stl{
 
     /// basic iterator tag
@@ -60,5 +61,90 @@ namespace stl{
         typedef const _Tp&                          reference;
     };
 
+    /// Traits for Category
+    template<typename Iterator>
+    inline typename iterator_traits<Iterator>::iterator_category Category(){
+        return typename stl::iterator_traits<Iterator>::iterator_category { } ;
+    }
+
+    /// Traits for Value Type
+    template<typename Iterator>
+    inline typename iterator_traits<Iterator>::value_type * ValueType(){
+        typedef typename stl::iterator_traits<Iterator>::value_type* Vl;
+        return Vl {nullptr};
+    }
+
+    ///Traits for Difference Type
+    template<typename Iterator>
+    inline typename iterator_traits<Iterator>::difference_type * DifferenceType(){
+        typedef typename stl::iterator_traits<Iterator>::difference_type* Vl;
+        return Vl {nullptr};
+    }
+
 }
+namespace __std__{
+
+    /// Iterator Base Function
+
+    /// The Implementation of Distance
+    template<typename InputIterator>
+    inline typename stl::iterator_traits<InputIterator>::difference_type
+    __distance(InputIterator _First, InputIterator _Last, stl::input_iterator_tag){
+        typename stl::iterator_traits<InputIterator>::difference_type _Result = 0;
+        for ( ; _First != _Last; ++_First)
+            ++_Result;
+        return _Result;
+    }
+
+    template<typename InputIterator>
+    inline typename stl::iterator_traits<InputIterator>::difference_type
+    __distance(InputIterator _First, InputIterator _Last, stl::random_access_iterator_tag){
+        return _Last - _First;
+    }
+
+    /// The Implementation of Advance
+    template<typename InputIterator, typename Distance>
+    inline void advance(InputIterator& __iter, Distance __n, stl::input_iterator_tag){
+        while (__n > 0){
+            --__n;
+            ++__iter;
+        }
+    }
+
+    template<typename InputIterator, typename Distance>
+    inline void advance(InputIterator& __iter, Distance __n, stl::bidirectional_iterator_tag){
+        if (__n >= 0)
+            while (__n--)
+                ++__iter;
+        else
+            while (__n++)
+                --__iter;
+    }
+
+    template<typename InputIterator, typename Distance>
+    inline void advance(InputIterator& __iter, Distance __n, stl::random_access_iterator_tag){
+        __iter += __n;
+    }
+}
+
+namespace stl{
+
+    /// Iterator Base Function
+
+    /// distance
+    template<typename InputIterator>
+    inline typename iterator_traits<InputIterator>::difference_type
+    distance(InputIterator _First, InputIterator _Last){
+        typedef typename stl::iterator_traits<InputIterator>::iterator_category _Category;
+        return __std__::__distance(_First, _Last, _Category{ });
+    }
+
+    /// advance
+    template<typename InputIterator, typename Distance>
+    inline void advance(InputIterator& Iter, Distance n){
+        typedef typename stl::iterator_traits<InputIterator>::iterator_category _Category;
+        __std__::advance(Iter, n, _Category{ } );
+    }
+}
+
 #endif //STL2_0_ITERATOR_TRAITS_H
