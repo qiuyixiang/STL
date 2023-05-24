@@ -11,8 +11,12 @@
 /// Exception For New Delete
 
 #define  _STL_THROWN(_Ecp) throw(_Ecp)
+
 #define _STL_NO_EXCEPTION noexcept
 
+#define _STL_USE_CONSTEXPR constexpr
+
+#define _STL_USE_UTILITY_INLINE inline
 
 namespace stl{
     /// Base type define

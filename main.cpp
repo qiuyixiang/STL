@@ -49,11 +49,13 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
+#include <functional>
 #include <memory>
 
 #include "include/iterator.h"
 #include "include/memory.h"
 #include "include/allocator.h"
+#include "include/functional.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -100,8 +102,8 @@ namespace construct_test_unit{
         int *_end = stl::uninitialized_copy_n(group1, 10, group2);
         std::cout<<(*_end)<<" "<<*(_end - 1)<<std::endl;
 
-        for (int i = 0; i < 10; ++i){
-            std::cout<<(group2[i])<<" ";
+        for (int & i : group2){
+            std::cout<<i<<" ";
         }
         std::cout<<std::endl;
     }
@@ -122,12 +124,23 @@ namespace allocator_test_unit{
     }
 }
 
+namespace functor_test{
+    void functor_test(){
+        ///std::plus<>(10, 20);
+        std::cout<<stl::plus<>()(10, 3.2342)<<std::endl;
+        stl::plus<int>()(10, 10);
+        std::cout<<stl::negate<>()(-34.3424)<<std::endl;
+        ///std::back_inserter()
+    }
+}
+
 int main(int argc, char ** argv){
 
     ///memory_test_unit::_memory_test_unit();
     ///construct_test_unit::construct_test();
     ///allocator_test_unit::new_allocator_test();
-    construct_test_unit::uninitialized_test();
+    ///construct_test_unit::uninitialized_test();
+    functor_test::functor_test();
 
     return 0;
 }
