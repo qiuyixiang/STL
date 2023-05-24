@@ -134,13 +134,48 @@ namespace functor_test{
     }
 }
 
+namespace iterator_test{
+    void inserter_iterator_test(){
+        ///std::back_inserter()
+        std::vector<int>group = {1,2,3,4,5,6,7};
+        ///std::cout<<*group.insert(group.begin(), 0)<<std::endl;
+        int number = 100;
+        stl::__normal_iterator<int*>normalIterator(&number);
+        stl::__normal_iterator<int*>normalIterator1(normalIterator);
+        std::cout<<*(normalIterator1.base())<<std::endl;
+        DISPLAY(group.begin(), group.end());
+        DISPLAY_DBG(group);
+    }
+    void reverse_iterator_test(){
+        stl::reverse_iterator<int*>reverseIterator;
+        stl::reverse_iterator<double*>reverseIterator1;
+        ///stl::reverse_iterator<int*>reverseIterator2(reverseIterator1);
+        std::vector<int>group = {1,2,3,4,5,6,7};
+        stl::reverse_iterator<std::vector<int>::iterator>reverseIterator2(group.end());
+        stl::reverse_iterator<std::vector<int>::iterator>reverseIterator3(group.begin());
+        for ( ; reverseIterator2 != reverseIterator3; ++reverseIterator2)
+            std::cout<<*reverseIterator2<<" ";
+        std::cout<<std::endl;
+
+    }
+}
+namespace utility_test{
+    void pair_test(){
+        ///std::pair<>
+        auto pairs = stl::make_pair("Hello World ", 10);
+        std::cout<<pairs.first<<" "<<pairs.second<<std::endl;
+    }
+}
 int main(int argc, char ** argv){
 
     ///memory_test_unit::_memory_test_unit();
     ///construct_test_unit::construct_test();
     ///allocator_test_unit::new_allocator_test();
     ///construct_test_unit::uninitialized_test();
-    functor_test::functor_test();
+    ///functor_test::functor_test();
+    ///iterator_test::inserter_iterator_test();
+    ///iterator_test::reverse_iterator_test();
+    utility_test::pair_test();
 
     return 0;
 }

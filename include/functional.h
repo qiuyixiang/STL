@@ -12,10 +12,11 @@
 
 #include "./functor/functor.h"
 #include "./util/ctt.h"
+#include "./util/utility.h"
 
 #include <iostream>
 
-namespace stl{
+namespace __std__{
 
     /// Inner Display (Debugger) for Container
 
@@ -37,5 +38,8 @@ namespace stl{
 #endif
     }
 }
+
+#define DISPLAY(__first, __last) __std__::__display__((__first), (__last))
+#define DISPLAY_DBG(__container) __std__::__display_dbg(__container)
 
 #endif //STL2_0_FUNCTIONAL_H

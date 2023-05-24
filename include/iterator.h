@@ -8,5 +8,6 @@
 /// Iterator junction file
 
 #include "iterator/iterator_traits.h"
+#include "iterator/stl_iterator.h"
 
 #endif //STL2_0_ITERATOR_H
