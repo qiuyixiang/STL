@@ -10,6 +10,7 @@
  * Extends Iterator !
  */
 
+
 #include "./iterator_traits.h"
 
 namespace stl{
@@ -329,6 +330,132 @@ namespace stl{
     _STL_USE_UTILITY_INLINE bool operator<=
             (const reverse_iterator<_Iterator>& __l, const reverse_iterator<_Iterator>& __r){
         return __l.base() <= __r.base();
+    }
+
+    /// Input Stream Iterator
+
+    template<typename _Tp, typename _Distance = stl::ptrdiff_t>
+    class istream_iterator;
+
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE bool operator==
+            (const istream_iterator<_Tp>& __x, const istream_iterator<_Tp>&__y);
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE bool operator!=
+            (const istream_iterator<_Tp>& __x, const istream_iterator<_Tp>&__y);
+
+    template<typename _Tp, typename _Distance>
+    class istream_iterator{
+        /// Friend Member Declare
+        friend bool operator== _STL_USE_MULL_TMP_ARG
+                (const istream_iterator<_Tp>& __x, const istream_iterator<_Tp>&__y);
+        friend bool operator!= _STL_USE_MULL_TMP_ARG
+                (const istream_iterator<_Tp>& __x, const istream_iterator<_Tp>&__y);
+    public:
+           typedef _Tp value_type;
+           typedef _Distance difference_type;
+           typedef const _Tp* pointer;
+           typedef const _Tp& reference;
+           typedef const _Tp* const_pointer;
+           typedef const _Tp& const_reference;
+           typedef stl::input_iterator_tag iterator_category;
+
+           /// Protected Member
+    protected:
+            value_type _M_value;
+            bool _M_end_mark;
+            std::istream* _M_stream;
+
+            void __read(){
+                _M_end_mark = (*_M_stream) ? true : false;
+                if (_M_stream)
+                    *_M_stream >> _M_value;
+                /// Update The Status OF the istream
+                _M_end_mark = (*_M_stream) ? true : false;
+            }
+            bool _M_equal(const istream_iterator& __other) const {
+                return _M_end_mark == __other._M_end_mark &&
+                       (!_M_end_mark || _M_stream == __other._M_stream);
+            }
+    public:
+        _STL_USE_CONSTEXPR istream_iterator() : _M_stream(&std::cin), _M_end_mark(false) {  }
+        istream_iterator(std::istream& __is) : _M_stream(&__is) { this->__read(); }
+
+        reference operator*() const {  return _M_value; }
+        pointer operator->() const {  return &(this->operator*()); }
+
+        istream_iterator& operator++() {
+            this->__read();
+            return *this;
+        };
+        istream_iterator operator++(int){
+            istream_iterator __temp = *this;
+            this->__read();
+            return __temp;
+        }
+    };
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE bool operator==
+    (const istream_iterator<_Tp>& __x, const istream_iterator<_Tp>&__y){
+        return __x._M_equal(__y);
+    }
+
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE bool operator!=
+            (const istream_iterator<_Tp>& __x, const istream_iterator<_Tp>&__y){
+        return !__x._M_equal(__y);
+    }
+
+    /// Output Stream Iterator
+
+    template<typename _Tp>
+    class ostream_iterator;
+
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE bool operator==
+            (const ostream_iterator<_Tp>& __x, const ostream_iterator<_Tp> __y);
+
+    template<typename _Tp>
+    class ostream_iterator{
+        friend bool operator== _STL_USE_MULL_TMP_ARG
+                (const ostream_iterator<_Tp>& __x, const ostream_iterator<_Tp> __y);
+    public:
+            typedef stl::output_iterator_tag iterator_category;
+            typedef void value_type;
+            typedef void pointer;
+            typedef void reference;
+            typedef void difference_type;
+    protected:
+            std::ostream * _M_stream;
+            const char * _M_string;
+    public:
+        _STL_USE_CONSTEXPR ostream_iterator(std::ostream & __os)
+        : _M_stream(&__os), _M_string(nullptr) {  }
+
+        _STL_USE_CONSTEXPR ostream_iterator(std::ostream & __os, const char * __ptr)
+        : _M_string(__ptr), _M_stream(&__os) {  }
+
+        ostream_iterator& operator=(const _Tp& __val){
+            *_M_stream << __val;
+            if (_M_string)
+                *_M_stream << _M_string;
+            return *this;
+        }
+
+        ostream_iterator& operator++() {  return *this;  }
+        ostream_iterator operator++(int) {  return *this; }
+        ostream_iterator& operator*() {  return *this;  }
+    };
+
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE bool operator==
+    (const ostream_iterator<_Tp>& __x, const ostream_iterator<_Tp> __y){
+        return __x._M_string == __y._M_string && __x._M_stream == __y._M_stream;
+    }
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE bool operator!=
+    (const ostream_iterator<_Tp>& __x, const ostream_iterator<_Tp> __y){
+        return !(__x == __y);
     }
 }
 #endif //STL2_0_STL_ITERATOR_H

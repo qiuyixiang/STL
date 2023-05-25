@@ -64,7 +64,6 @@ namespace memory_test_unit{
     }
     void _memory_test_unit(){
         ///::operator new()
-
         std::set_new_handler(&my_new_handler);
         stl::_new_del::operator new(size_t(-1));
 
@@ -108,12 +107,10 @@ namespace construct_test_unit{
         std::cout<<std::endl;
     }
 }
-
 namespace allocator_test_unit{
 
     void new_allocator_test(){
         ///std::allocator<int> allocator;
-
         int number = 100;
         stl::allocator<int>allocator;
         std::cout<<*(allocator.address(number))<<std::endl;
@@ -123,7 +120,6 @@ namespace allocator_test_unit{
         stl::allocator_traits<stl::allocator<int>>::allocate(allocator, 10);
     }
 }
-
 namespace functor_test{
     void functor_test(){
         ///std::plus<>(10, 20);
@@ -131,6 +127,21 @@ namespace functor_test{
         stl::plus<int>()(10, 10);
         std::cout<<stl::negate<>()(-34.3424)<<std::endl;
         ///std::back_inserter()
+    }
+    class functor_{
+    public:
+        explicit constexpr functor_() {  };
+        void __display() {
+            std::cout<<"Member Function Test"<<std::endl;
+        }
+    };
+    void functor_mem_test(){
+        functor_test::functor_ func;
+        stl::mem_fun_t<functor_, void>memFun(&functor_::__display);
+        auto ptr1 = std::mem_fn(&functor_::__display);
+        ptr1(&func);
+        auto ptr2 = stl::mem_fun(&functor_::__display);
+        ptr2(&func);
     }
 }
 
@@ -158,12 +169,25 @@ namespace iterator_test{
         std::cout<<std::endl;
 
     }
+
+    void stream_iterator_test(){
+        std::istream_iterator<int>istreamIterator;
+        stl::istream_iterator<int>istreamIterator1;
+        stl::istream_iterator<int>istreamIterator2;
+        std::cout<<std::boolalpha<<(istreamIterator1 != istreamIterator2)<<std::endl;
+        ++istreamIterator1;
+        std::cout<<*istreamIterator1<<std::endl;
+        stl::ostream_iterator<std::string>ostreamIterator(std::cout, "\n");
+        ostreamIterator = "Hello ostream Iterator !";
+    }
 }
 namespace utility_test{
+
     void pair_test(){
         ///std::pair<>
         auto pairs = stl::make_pair("Hello World ", 10);
         std::cout<<pairs.first<<" "<<pairs.second<<std::endl;
+        ///std::mem_fn()
     }
 }
 int main(int argc, char ** argv){
@@ -175,7 +199,9 @@ int main(int argc, char ** argv){
     ///functor_test::functor_test();
     ///iterator_test::inserter_iterator_test();
     ///iterator_test::reverse_iterator_test();
-    utility_test::pair_test();
+    ///iterator_test::stream_iterator_test();
+    ///utility_test::pair_test();
+    functor_test::functor_mem_test();
 
     return 0;
 }

@@ -18,6 +18,8 @@
 
 #define _STL_USE_UTILITY_INLINE inline
 
+#define _STL_USE_MULL_TMP_ARG <>
+
 namespace stl{
     /// Base type define
     typedef unsigned int size_t;

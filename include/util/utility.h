@@ -27,7 +27,7 @@ namespace stl{
         first_type first;
         second_type second;
 
-        _STL_USE_CONSTEXPR pair() : first{ }, second { } { };;
+        _STL_USE_CONSTEXPR pair() : first{ }, second { } { };
 
         pair(const _Arg1& __l, const _Arg2& __r) : first(__l), second(__r) {  };
         pair(_Arg1&& __l, _Arg2&& __r) : first(std::move(__l)), second(std::move(__r)) {  };
@@ -107,7 +107,7 @@ namespace stl{
     }
     template<typename _Tp1, typename _Tp2>
     _STL_USE_UTILITY_INLINE bool operator>
-            (const pair<_Tp1, _Tp2>& __l, const pair<_Tp1, _Tp2>& __r){
+    (const pair<_Tp1, _Tp2>& __l, const pair<_Tp1, _Tp2>& __r){
         return __l.first > __r.first || (__l.first == __r.first && __l.second > __r.second);
     }
 
