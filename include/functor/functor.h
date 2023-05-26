@@ -442,8 +442,134 @@ namespace stl{
     };
 
     template<typename _Class, typename _Res>
-    _STL_USE_UTILITY_INLINE mem_fun_t<_Class, _Res> mem_fun(_Res (_Class::*__ptr)()){
+    class const_mem_fun_t : public unary_functor<_Class*, _Res>{
+    protected:
+        _Res (_Class::*_M_ptr)() const;
+    public:
+        explicit _STL_USE_CONSTEXPR const_mem_fun_t(_Res (_Class::*__ptr)() const) : _M_ptr(__ptr) {  };
+        _Res operator()(const _Class * __ptr) const {
+            return (__ptr->*_M_ptr)();
+        }
+    };
+
+    template<typename _Class, typename _Res>
+    class mem_fun_ref_t : public unary_functor<_Class*, _Res>{
+    protected:
+        _Res (_Class::*_M_ptr)();
+    public:
+        explicit _STL_USE_CONSTEXPR mem_fun_ref_t(_Res (_Class::*__ptr)()) : _M_ptr(__ptr) {  };
+        _Res operator()(_Class& __ref) const {
+            return (__ref.*_M_ptr)();
+        }
+    };
+
+    template<typename _Class, typename _Res>
+    class const_mem_fun_ref_t : public unary_functor<_Class*, _Res>{
+    protected:
+        _Res (_Class::*_M_ptr)() const;
+    public:
+        explicit _STL_USE_CONSTEXPR const_mem_fun_ref_t(_Res (_Class::*__ptr)() const) : _M_ptr(__ptr) {  };
+        _Res operator()(const _Class& __ref) const {
+            return (__ref.*_M_ptr)();
+        }
+    };
+
+    template<typename _Class, typename _Res, typename _Arg>
+    class mem_fun1_t :
+            public binary_functor<_Class*, _Arg, _Res>{
+    protected:
+        _Res (_Class::*_M_ptr)(_Arg);
+    public:
+        explicit _STL_USE_CONSTEXPR mem_fun1_t(_Res (_Class::*__ptr)(_Arg)) : _M_ptr(__ptr) {  };
+        _Res operator()(_Class * __ptr, _Arg _arg) const {
+            return (__ptr->*_M_ptr)(_arg);
+        }
+    };
+
+    template<typename _Class, typename _Res, typename _Arg>
+    class const_mem_fun1_t :
+            public binary_functor<_Class*, _Arg, _Res>{
+    protected:
+        _Res (_Class::*_M_ptr)(_Arg) const;
+    public:
+        explicit _STL_USE_CONSTEXPR const_mem_fun1_t(_Res (_Class::*__ptr)(_Arg) const) : _M_ptr(__ptr) {  };
+        _Res operator()(const _Class * __ptr, _Arg _arg) const {
+            return (__ptr->*_M_ptr)(_arg);
+        }
+    };
+
+    template<typename _Class, typename _Res, typename _Arg>
+    class mem_fun1_ref_t :
+            public binary_functor<_Class*, _Arg, _Res>{
+    protected:
+        _Res (_Class::*_M_ptr)(_Arg);
+    public:
+        explicit _STL_USE_CONSTEXPR mem_fun1_ref_t(_Res (_Class::*__ptr)(_Arg)) : _M_ptr(__ptr) {  };
+        _Res operator()(_Class&  __ref, _Arg _arg) const {
+            return (__ref.*_M_ptr)(_arg);
+        }
+    };
+
+    template<typename _Class, typename _Res, typename _Arg>
+    class const_mem_fun1_ref_t :
+            public binary_functor<_Class*, _Arg, _Res>{
+    protected:
+        _Res (_Class::*_M_ptr)(_Arg) const;
+    public:
+        explicit _STL_USE_CONSTEXPR const_mem_fun1_ref_t(_Res (_Class::*__ptr)(_Arg) const) : _M_ptr(__ptr) {  };
+        _Res operator()(const _Class&  __ref, _Arg _arg) const {
+            return (__ref.*_M_ptr)(_arg);
+        }
+    };
+
+    /// Simplification of Pointer Member Function
+    template<typename _Class, typename _Res>
+    _STL_USE_UTILITY_INLINE mem_fun_t<_Class, _Res>
+            mem_fun(_Res (_Class::*__ptr)()){
         return mem_fun_t<_Class, _Res>(__ptr);
+    }
+
+    template<typename _Class, typename _Res>
+    _STL_USE_UTILITY_INLINE const_mem_fun_t<_Class, _Res>
+            mem_fun(_Res (_Class::*__ptr)() const){
+        return const_mem_fun_t<_Class, _Res>(__ptr);
+    }
+
+    template<typename _Class, typename _Res>
+    _STL_USE_UTILITY_INLINE mem_fun_ref_t<_Class, _Res>
+            mem_fun_ref(_Res (_Class::*__ptr)()){
+        return mem_fun_ref_t<_Class, _Res>(__ptr);
+    }
+
+    template<typename _Class, typename _Res>
+    _STL_USE_UTILITY_INLINE const_mem_fun_ref_t<_Class, _Res>
+            mem_fun_ref(_Res (_Class::*__ptr)() const){
+        return const_mem_fun_ref_t<_Class, _Res>(__ptr);
+    }
+
+    /// With One Argument
+    template<typename _Class, typename _Res, typename _Arg>
+    _STL_USE_UTILITY_INLINE mem_fun1_t<_Class, _Res, _Arg>
+            mem_fun1(_Res (_Class::*__ptr)(_Arg)){
+        return mem_fun1_t<_Class, _Res, _Arg>(__ptr);
+    }
+
+    template<typename _Class, typename _Res, typename _Arg>
+    _STL_USE_UTILITY_INLINE const_mem_fun1_t<_Class, _Res, _Arg>
+            mem_fun1(_Res (_Class::*__ptr)(_Arg) const){
+        return const_mem_fun1_t<_Class, _Res, _Arg>(__ptr);
+    }
+
+    template<typename _Class, typename _Res, typename _Arg>
+    _STL_USE_UTILITY_INLINE mem_fun1_ref_t<_Class, _Res, _Arg>
+            mem_fun1_ref(_Res (_Class::*__ptr)(_Arg)){
+        return mem_fun1_ref_t<_Class, _Res, _Arg>(__ptr);
+    }
+
+    template<typename _Class, typename _Res, typename _Arg>
+    _STL_USE_UTILITY_INLINE const_mem_fun1_ref_t<_Class, _Res, _Arg>
+            mem_fun1_ref(_Res (_Class::*__ptr)(_Arg) const){
+        return const_mem_fun1_ref_t<_Class, _Res, _Arg>(__ptr);
     }
 }
 #endif //STL2_0_FUNCTOR_H
