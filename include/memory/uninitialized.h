@@ -20,9 +20,9 @@
 
 
 namespace stl{
-    template<typename _ForwardIterator>
+    template<typename _InputIterator, typename _ForwardIterator>
     inline _ForwardIterator uninitialized_copy
-    (_ForwardIterator _First, _ForwardIterator _Last, _ForwardIterator _Result);
+    (_InputIterator _First, _InputIterator _Last, _ForwardIterator _Result);
 }
 namespace __std__{
     /// uninitialized_fill_n
@@ -57,15 +57,15 @@ namespace __std__{
     }
 
     ///uninitialized_copy
-    template<typename _ForwardIterator>
+    template<typename _InputIterator, typename _ForwardIterator>
     inline _ForwardIterator __uninitialized_copy_aux
-    (_ForwardIterator _First, _ForwardIterator _Last, _ForwardIterator _Result, std::true_type){
+    (_InputIterator _First, _InputIterator _Last, _ForwardIterator _Result, std::true_type){
         return std::copy(_First, _Last, _Result);
     }
 
-    template<typename _ForwardIterator>
+    template<typename _InputIterator, typename _ForwardIterator>
     inline _ForwardIterator __uninitialized_copy_aux
-    (_ForwardIterator _First, _ForwardIterator _Last, _ForwardIterator _Result, std::false_type){
+    (_InputIterator _First, _InputIterator _Last, _ForwardIterator _Result, std::false_type){
         _ForwardIterator _Current = _Result;
         for ( ; _First != _Last; ++_First, ++_Current)
             stl::_Construct(_Current, *_First);
@@ -94,44 +94,52 @@ namespace stl{
     /// uninitialized_fill_n
 
     template<typename _ForwardIterator, typename _Tp>
-    inline _ForwardIterator uninitialized_fill_n(_ForwardIterator _First, stl::size_t __n, const _Tp& __val){
+    inline _ForwardIterator
+    uninitialized_fill_n(_ForwardIterator _First, stl::size_t __n, const _Tp& __val){
         typedef typename stl::iterator_traits<_ForwardIterator>::value_type _Val_Type;
         return __std__::__uninitialized_fill_n_aux(_First, __n, __val, std::is_pod<_Val_Type> { });
     }
 
     /// uninitialized_fill
     template<typename _ForwardIterator, typename _Tp>
-    inline void uninitialized_fill(_ForwardIterator _First, _ForwardIterator _Last, const _Tp& __val){
+    inline void
+    uninitialized_fill(_ForwardIterator _First, _ForwardIterator _Last, const _Tp& __val){
         typedef typename stl::iterator_traits<_ForwardIterator>::value_type _Val_Type;
-        __std__::__uninitialized_fill_aux(_First, _Last, std::is_pod<_Val_Type> {  });
+        __std__::__uninitialized_fill_aux(_First, _Last, __val,  std::is_pod<_Val_Type> {  });
     }
 
     ///uninitialized_copy
-    template<typename _ForwardIterator>
-    inline _ForwardIterator uninitialized_copy(_ForwardIterator _First, _ForwardIterator _Last, _ForwardIterator _Result){
+    template<typename _InputIterator, typename _ForwardIterator>
+    inline _ForwardIterator
+    uninitialized_copy(_InputIterator _First, _InputIterator _Last, _ForwardIterator _Result){
 #ifdef DEBUGGER
         std::cout<<"uninitialized_copy() invoked !!!"<<std::endl;
 #endif
         typedef typename stl::iterator_traits<_ForwardIterator>::value_type _Val_Type;
-        return __std__::__uninitialized_copy_aux(_First, _Last, _Result, std::is_pod<_Val_Type>{ });
+        return __std__::__uninitialized_copy_aux
+        (_First, _Last, _Result, std::is_pod<_Val_Type>{ });
     }
 
     /// Specialization for uninitialized_copy
-    inline char * uninitialized_copy(const char * __first, const char * __last, char * __result){
+    inline char *
+    uninitialized_copy(const char * __first, const char * __last, char * __result){
         memmove(static_cast<void*>(__result),
                 static_cast<void*>(const_cast<char*>(__first)), sizeof(char ) * (__last - __first));
         return __result + (__last - __first);
     }
 
-    inline wchar_t * uninitialized_copy(const wchar_t * __first, const wchar_t * __last, wchar_t * __result){
+    inline wchar_t *
+    uninitialized_copy(const wchar_t * __first, const wchar_t *__last, wchar_t * __result){
         memmove(static_cast<void*>(__result),
-                static_cast<void*>(const_cast<wchar_t*>(__first)), sizeof(wchar_t ) * (__last - __first));
+                static_cast<void*>
+                (const_cast<wchar_t*>(__first)), sizeof(wchar_t ) * (__last - __first));
         return __result + (__last - __first);
     }
 
     /// uninitialized_copy_n
     template<typename InputIterator, typename ForwardIterator>
-    inline ForwardIterator uninitialized_copy_n(InputIterator _First, stl::size_t __n, ForwardIterator _Result){
+    inline ForwardIterator
+    uninitialized_copy_n(InputIterator _First, stl::size_t __n, ForwardIterator _Result){
         typedef typename stl::iterator_traits<InputIterator>::iterator_category _Category;
         return __std__::__uninitialized_copy_n_aux(_First, __n, _Result, _Category{ });
     }

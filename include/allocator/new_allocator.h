@@ -68,6 +68,7 @@ namespace stl{
         }
 
         void deallocate(pointer __p) const {
+            ///std::cout<<"Deallocate"<<std::endl;
             if (__p){
                 stl::_new_del::operator delete(__p);
             }

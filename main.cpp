@@ -43,19 +43,22 @@
 
 /// Test Unit Migrate Here
 
-/// Debugger Entry
-#define DEBUGGER
+/// Debugger Option
+///#define DEBUGGER
+///#define VECTOR_DBG
 
 #include <iostream>
 #include <iterator>
 #include <vector>
 #include <functional>
 #include <memory>
+#include <deque>
 
 #include "include/iterator.h"
 #include "include/memory.h"
 #include "include/allocator.h"
 #include "include/functional.h"
+#include "include/sequence_container/stl_vector.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -118,6 +121,9 @@ namespace allocator_test_unit{
         stl::allocator_traits<stl::allocator<int>>::rebind_alloc<double> allocator1;
         double * ptr = allocator1.allocate(1);
         stl::allocator_traits<stl::allocator<int>>::allocate(allocator, 10);
+
+        typedef stl::allocator_traits<stl::allocator<int>>::rebind_alloc<double> rebindAllocType;
+        rebindAllocType alloc;
     }
 }
 namespace functor_test{
@@ -144,7 +150,6 @@ namespace functor_test{
         ptr2(&func);
     }
 }
-
 namespace iterator_test{
     void inserter_iterator_test(){
         ///std::back_inserter()
@@ -188,7 +193,78 @@ namespace utility_test{
         auto pairs = stl::make_pair("Hello World ", 10);
         std::cout<<pairs.first<<" "<<pairs.second<<std::endl;
         ///std::mem_fn()
+        int a = 10, b = 20;
+        std::cout<<a<<" "<<b<<" "<<std::endl;
+        stl::swap(a, b);
+        std::cout<<a<<" "<<b<<" "<<std::endl;
+        stl::pair<int, int>pair1 = stl::make_pair(10, 10);
+        stl::pair<int, int>pair2 = stl::make_pair(20, 20);
+        stl::swap(pair1, pair2);
+        std::cout<<pair2.first<<" "<<pair2.second<<std::endl;
     }
+}
+namespace sequence_container_test{
+    /// sequence container test unit
+    /// use Macro DISPLAY and DISPLAY_DBG
+
+    /// test for vector
+    void vector_test_unit1(){
+        std::vector<int>std_vector = {1,2,3,4,5,6,7,8};
+        stl::allocator<int>allocator;
+
+        ///int * ptr = alloc.allocate(1);
+        __std__::_Vec_Base<int, stl::allocator<int>>vecBase;
+        vecBase.get_Tp_allocator();
+        std::allocator<int>allocator1;
+        ///allocator1.deallocate();
+        std_vector.begin();
+        std_vector.back();
+        std_vector.empty();
+        stl::vector<int>vector(10);
+        std::cout<<std::endl;
+        vector.display(true);
+        stl::vector<int>vector1(10, 10);
+        vector1.display(true);
+        std::cout<<vector1.front()<<" "<<vector1.back()<<std::endl;
+        stl::vector<int>vector2 = {1,2,3,4,5,6,7,8};
+        vector2.display(true);
+        stl::vector<double>vector3(10);
+        std::cout<<vector2.max_size()<<" "<<vector3.max_size()<<std::endl;
+        stl::vector<int>vector4(vector2);
+        vector4.display(true);
+    }
+
+    void vector_test_unit2(){
+        stl::vector<int>std_vector(10, 5);
+        stl::vector<int>std_vector1(std::move(std_vector));
+
+        std_vector1.display(true);
+        std_vector.display(true);
+
+        stl::vector<int>vector = {1,2,3,4,5,6,7};
+        stl::vector<int>vector1;
+        vector = std::move(vector1);
+
+        vector.display(true);
+        vector1.display(true);
+
+        std::vector<int>vector2 = {1,2,3,4,5,6,7};
+        std::vector<int>vector3;
+
+        vector3 = std::move(vector2);
+        DISPLAY_DBG(vector2);
+        std::cout<<vector2.capacity()<<std::endl;
+        stl::vector<int>vector4 = {1,2,3,4,5,6,7};
+        stl::vector<int>vector5;
+        vector5 = std::move(vector4);
+        vector5.display(true);
+        vector4.display(true);
+    }
+
+    void deque_test_unit(){
+        std::deque<int>std_deque;
+    }
+
 }
 int main(int argc, char ** argv){
 
@@ -201,7 +277,9 @@ int main(int argc, char ** argv){
     ///iterator_test::reverse_iterator_test();
     ///iterator_test::stream_iterator_test();
     ///utility_test::pair_test();
-    functor_test::functor_mem_test();
+    ///functor_test::functor_mem_test();
+    ///sequence_container_test::vector_test_unit1();
+    sequence_container_test::vector_test_unit2();
 
     return 0;
 }

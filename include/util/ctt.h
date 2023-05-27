@@ -5,6 +5,7 @@
 #ifndef STL2_0_CTT_H
 #define STL2_0_CTT_H
 
+#include <bits/move.h>
 /// Base Functional and Macro Library
 
 
@@ -17,13 +18,15 @@
 #define _STL_USE_CONSTEXPR constexpr
 
 #define _STL_USE_UTILITY_INLINE inline
-
 #define _STL_USE_MULL_TMP_ARG <>
+
+#define __STL_GCC_MOVE(__val) std::move(__val)
 
 namespace stl{
     /// Base type define
     typedef unsigned int size_t;
     typedef stl::size_t ptrdiff_t;
+
 }
 
 #endif //STL2_0_CTT_H

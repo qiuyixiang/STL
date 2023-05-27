@@ -193,38 +193,60 @@ namespace stl{
         __normal_iterator operator-(difference_type __n) _STL_NO_EXCEPTION {
             return __normal_iterator(_M_current - __n);
         }
+        /// conversion from const_iterator to iterator
+        operator  __normal_iterator(){
+            return (__normal_iterator)*this;
+        }
     };
 
     /// Operator Declare For __normal_iterator
     template<typename _Iterator>
     _STL_USE_UTILITY_INLINE bool operator==
-    (__normal_iterator<_Iterator>& __l, __normal_iterator<_Iterator>& __r) _STL_NO_EXCEPTION {
+    (const __normal_iterator<_Iterator>& __l, const __normal_iterator<_Iterator>& __r)
+    _STL_NO_EXCEPTION {
         return __l.base() == __r.base();
     }
     template<typename _Iterator>
     _STL_USE_UTILITY_INLINE bool operator!=
-            (__normal_iterator<_Iterator>& __l, __normal_iterator<_Iterator>& __r) _STL_NO_EXCEPTION {
+            (const __normal_iterator<_Iterator>& __l, const __normal_iterator<_Iterator>& __r)
+            _STL_NO_EXCEPTION {
         return __l.base() != __r.base();
     }
     template<typename _Iterator>
     _STL_USE_UTILITY_INLINE bool operator>
-            (__normal_iterator<_Iterator>& __l, __normal_iterator<_Iterator>& __r) _STL_NO_EXCEPTION {
+            (const __normal_iterator<_Iterator>& __l,const __normal_iterator<_Iterator>& __r)
+            _STL_NO_EXCEPTION {
         return __l.base() > __r.base();
     }
     template<typename _Iterator>
     _STL_USE_UTILITY_INLINE bool operator>=
-            (__normal_iterator<_Iterator>& __l, __normal_iterator<_Iterator>& __r) _STL_NO_EXCEPTION {
+            (const __normal_iterator<_Iterator>& __l,const __normal_iterator<_Iterator>& __r)
+            _STL_NO_EXCEPTION {
         return __l.base() >= __r.base();
     }
     template<typename _Iterator>
     _STL_USE_UTILITY_INLINE bool operator<
-            (__normal_iterator<_Iterator>& __l, __normal_iterator<_Iterator>& __r) _STL_NO_EXCEPTION {
+            (const __normal_iterator<_Iterator>& __l,const __normal_iterator<_Iterator>& __r)
+            _STL_NO_EXCEPTION {
         return __l.base() < __r.base();
     }
     template<typename _Iterator>
     _STL_USE_UTILITY_INLINE bool operator<=
-            (__normal_iterator<_Iterator>& __l, __normal_iterator<_Iterator>& __r) _STL_NO_EXCEPTION {
+            (const __normal_iterator<_Iterator>& __l,const __normal_iterator<_Iterator>& __r)
+            _STL_NO_EXCEPTION {
         return __l.base() <= __r.base();
+    }
+    template<typename _Iterator>
+    _STL_USE_UTILITY_INLINE ptrdiff_t operator+
+            (const __normal_iterator<_Iterator>& __l,const __normal_iterator<_Iterator>& __r)
+            _STL_NO_EXCEPTION {
+        return __l.base() + __r.base();
+    }
+    template<typename _Iterator>
+    _STL_USE_UTILITY_INLINE ptrdiff_t operator-
+            (const __normal_iterator<_Iterator>& __l,const __normal_iterator<_Iterator>& __r)
+            _STL_NO_EXCEPTION {
+        return __l.base() - __r.base();
     }
 
     /// Reverse Iterator

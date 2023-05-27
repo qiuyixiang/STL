@@ -16,8 +16,23 @@
 #include "./ctt.h"
 namespace stl{
 
-    /// Pair Implementation
 
+    /// Base Utility Function
+
+
+    /**
+     * Swap
+     * Any Specialization Function can OverWrite it
+     */
+    template<typename _Tp>
+    _STL_USE_UTILITY_INLINE void swap(_Tp& __l, _Tp& __r){
+        _Tp __temp = __STL_GCC_MOVE(__l);
+        __l = __STL_GCC_MOVE(__r);
+        __r = __STL_GCC_MOVE(__temp);
+    }
+
+
+    /// Pair Implementation
     template<typename _Arg1, typename _Arg2>
     struct pair {
         using first_type = _Arg1;
@@ -64,7 +79,10 @@ namespace stl{
         ~pair() = default;
 
         /*TODO Implementation Of Swap*/
-        void swap(pair& _Other);
+        void swap(pair& _Other){
+            stl::swap(this->first, _Other.first);
+            stl::swap(this->second, _Other.second);
+        }
 
         template<typename _Other1, typename _Other2>
         pair& operator=(const pair<_Other1, _Other2>& __other){

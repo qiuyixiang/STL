@@ -22,6 +22,12 @@
 
 namespace stl{
 
+    /// Base Type Define for default_allocator
+    template<typename _Tp>
+    using default_allocator = stl::new_allocator<_Tp> ;
+
+
+    /// Allocator Traits
     template<typename _Alloc>
     class __allocator_traits{
 
