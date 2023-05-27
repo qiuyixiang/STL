@@ -22,6 +22,8 @@
 
 #define __STL_GCC_MOVE(__val) std::move(__val)
 
+#define BREAK "-----------------------------------------"
+
 namespace stl{
     /// Base type define
     typedef unsigned int size_t;

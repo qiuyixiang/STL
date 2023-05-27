@@ -24,7 +24,7 @@ namespace __std__{
         template<typename _ForwardIterator>
         static inline void __destroy_aux(_ForwardIterator _First, _ForwardIterator _Last){
             for (; _First != _Last; ++_First)
-                stl::_Destroy(_First);
+                stl::_Destroy(&(*_First));
         }
     };
 

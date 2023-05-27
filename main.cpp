@@ -259,8 +259,53 @@ namespace sequence_container_test{
         vector5 = std::move(vector4);
         vector5.display(true);
         vector4.display(true);
-    }
 
+        stl::vector<int>vector6;
+        vector6 = {1,2,3,4,5,6,7,8};
+        vector6.display(true);
+        vector6 = stl::vector<int>();
+        vector6.display(true);
+
+        std::vector<int>vector7;
+        int number = 100;
+        vector7.push_back(10);
+        vector7.push_back(number);
+        vector7.emplace_back(100);
+    }
+    class Container_class {
+    public:
+        int _cs;
+        std::string _ifn;
+
+        Container_class(int cs, const std::string& ifn) : _cs(cs), _ifn(ifn) {  }
+        ~Container_class() = default;
+
+    };
+    void vector_test_unit3(){
+        stl::vector<int>group;
+        group.push_back(10);
+        group.push_back(20);
+        group.emplace_back(30);
+        group.emplace_back(40);
+        group.emplace_back(50);
+
+        stl::vector<Container_class> group_cl;
+        group_cl.emplace_back(10 ,"Hello");
+        std::cout<<group_cl.size()<<std::endl;
+        std::cout<<group_cl[0]._cs<<" "<<group_cl[0]._ifn<<std::endl;
+        group_cl.push_back(Container_class(10, "Test"));
+        std::cout<<group_cl.size()<<" "<<group_cl.capacity()<<std::endl;
+        std::cout<<BREAK<<std::endl;
+        stl::vector<int>hr = {1,2,3,4,5,6,7,8};
+        hr.erase(hr.begin() + 3);
+        hr.display(true);
+        hr.pop_back();
+        hr.display(true);
+        hr.erase(hr.begin() + 1, hr.begin() + 3);
+        hr.display(true);
+        std::vector<int>any = {1,2,3};
+        any.shrink_to_fit();
+    }
     void deque_test_unit(){
         std::deque<int>std_deque;
     }
@@ -279,7 +324,8 @@ int main(int argc, char ** argv){
     ///utility_test::pair_test();
     ///functor_test::functor_mem_test();
     ///sequence_container_test::vector_test_unit1();
-    sequence_container_test::vector_test_unit2();
+    ///sequence_container_test::vector_test_unit2();
+    sequence_container_test::vector_test_unit3();
 
     return 0;
 }
