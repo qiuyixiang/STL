@@ -9,9 +9,23 @@
 #include "../iterator/iterator_traits.h"
 #include "../iterator/stl_iterator.h"
 #include "../util/utility.h"
+#include "../algorithm/stl_algorithm_base.h"
 
 #include <iostream>
 
+/**
+ * Vector Implementation Log
+ *
+ * Vector Version 1.0.0  :
+ *                  First Finished Base Vector Functions Test For 5 Unit
+ *                  Use stl::__normal_iterator to its base iterator !
+ *                  Constructor and Destructor are done !
+ *                  All Functions are in checked !
+ *                  Support std::initializer_list successfully !
+ *
+ * Vector Version 1.0.1 :
+ *
+ */
 /// The Implementation Of stl::vector
 
 namespace __std__{
@@ -92,6 +106,8 @@ namespace __std__{
         _Vec_Base(size_type __n, const _Rebind_Alloc_type& _other) : _M_imp(_other) {
             this->_M_create_storage(__n);
         }
+        /// Just Do Swap Operation
+        /// Because of the source vector's pointers are all nullptr
         _Vec_Base( _Vec_Base&& _Other) : _M_imp() {
             this->_M_imp._M_swap_data(_Other._M_imp);
         }
@@ -142,6 +158,11 @@ namespace stl{
         template<typename ...Args>
         void _M_emplace_back_auxiliary(Args&&...args);
 
+        iterator _M_Fill_insert(const_iterator __position, size_type __n, const value_type& __val);
+
+        template<typename _InputIterator>
+        iterator _M_Copy_insert(const_iterator __position, _InputIterator __first, _InputIterator __last);
+
     public:
         /// Public Constructor
         _STL_USE_CONSTEXPR vector() : _Vec_base() {  };
@@ -162,6 +183,11 @@ namespace stl{
         }
 
         /// Copy And Move Constructor
+        vector(const_iterator _Begin, const_iterator _End);
+
+        template<typename _ForwardIterator>
+        vector(_ForwardIterator _Begin, _ForwardIterator _End);
+
         vector(const vector<value_type>& _Other) : _Vec_base(_Other.size()){
             this->_M_Copy(_Other.begin(), _Other.end());
         }
@@ -257,6 +283,25 @@ namespace stl{
         iterator erase(iterator _position);
         void clear();
         void shrink_to_fit()noexcept;
+
+        template<typename ... _Args>
+        iterator emplace(const_iterator _position, _Args&&..._args);
+
+        iterator insert(const_iterator _position, const value_type& _val);
+
+        iterator insert(const_iterator _position, value_type && _val)
+        { return this->template emplace(_position, std::move(_val)); }
+
+        iterator insert(const_iterator _position, size_type _n, const value_type& _val);
+
+        iterator insert(const_iterator _position, const_iterator _First, const_iterator _last);
+
+        iterator insert(const_iterator _position, const std::initializer_list<value_type>&_Li) {
+            return this->template _M_Copy_insert(_position, _Li.begin(), _Li.end());
+        }
+
+        void resize(size_type new_size);
+        void resize(size_type new_size, const value_type& _val);
     };
 
     /// Implementation of Member Functions
@@ -290,6 +335,18 @@ namespace stl{
         this->_M_imp._M_end_of_storage = nullptr;
     }
 
+    template<typename _Tp, typename _Alloc>
+    vector<_Tp, _Alloc>::vector(const_iterator _Begin, const_iterator _End)
+    : _Vec_base(size_type(_End - _Begin)) {
+        this->template _M_Copy(_Begin, _End);
+    }
+
+    template<typename _Tp, typename _Alloc>
+    template<typename _ForwardIterator>
+    vector<_Tp, _Alloc>::vector(_ForwardIterator _Begin, _ForwardIterator _End)
+    : _Vec_base(size_type(_End - _Begin)){
+        this->template _M_Copy(_Begin, _End);
+    }
     template<typename _Tp, typename _Alloc>
     vector<_Tp, _Alloc>& vector<_Tp, _Alloc>::operator=(const vector<_Tp, _Alloc> &_Other) {
         if (this != &_Other){
@@ -325,7 +382,7 @@ namespace stl{
     void vector<_Tp, _Alloc>::push_back(const value_type &_val) {
         if (this->_M_imp._M_finish != this->_M_imp._M_end_of_storage){
             stl::_Construct(this->_M_imp._M_finish, _val);
-            ++this->_M_imp._M_start;
+            ++this->_M_imp._M_finish;
         } else
             this->template _M_emplace_back_auxiliary(_val);
     }
@@ -406,6 +463,176 @@ namespace stl{
         if (this->size() == this->capacity())
             return;
         /// TODO Shrink_to_fit
+        vector __temp(*this);
+        this->_M_Clear();
+        *this = __temp;
+    }
+
+    /// Insert
+    /// The Implementation Of stl::vector insert OverWrite Function
+    template<typename _Tp, typename _Alloc>
+    typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>::
+            insert(const_iterator _position, const value_type &_val) {
+        if (_position == this->end()){
+            this->push_back(_val);
+            return _position;
+        }
+        return this->insert(_position, 1, _val);
+            }
+
+    template<typename _Tp, typename _Alloc>
+    template<typename... _Args>
+    typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>::
+    emplace(const_iterator _position, _Args&& ..._args) {
+        if (_position == this->end()){
+            this->template emplace_back(std::forward<_Args>(_args)...);
+            return _position;
+        }
+        if (this->_M_imp._M_finish != this->_M_imp._M_end_of_storage){
+            std::copy_backward(_position, this->end(), this->end() + 1);
+            stl::_Construct(_position.base(), std::forward<_Args>(_args)...);
+            this->_M_imp._M_finish++;
+            return _position;
+        } else{
+            /// Run Out Of Memory
+            const size_type _old_size = this->size();
+            /// DONE_TODO : Replace std::max() to stl::max()
+            const size_type _new_size = 2 * _old_size;
+            pointer new_start = this->get_allocator().allocate(_new_size);
+            pointer new_finish = new_start;
+            /// Processed Exception
+            try {
+                new_finish = stl::uninitialized_copy(this->begin(), _position, new_start);
+                stl::_Construct(new_finish, std::forward<_Args>(_args)...);
+                ++new_finish;
+                new_finish = stl::uninitialized_copy(_position, this->end(), new_finish);
+            } catch (...) {
+                stl::_Destroy(new_start, new_finish);
+                this->get_allocator().deallocate(new_start, _new_size);
+                throw ;
+            }
+            /// Destroy and Deallocate Previous Memory
+            this->_M_Clear();
+            /// Reset pointer
+            this->_M_imp._M_start = new_start;
+            this->_M_imp._M_finish = new_finish;
+            this->_M_imp._M_end_of_storage = new_start + _new_size;
+
+            return _position;
+        }
+    }
+
+    template<typename _Tp, typename _Alloc>
+    template<typename _InputIterator>
+    typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>::
+    _M_Copy_insert(const_iterator __position, _InputIterator __first, _InputIterator __last){
+        if (__first == __last)
+            return __position;
+        const difference_type __dif = stl::distance(__first, __last);
+        if (difference_type(this->capacity() - this->size()) >= __dif){
+            /// Have Enough Memory
+            pointer __old_iter = this->end().base();
+            std::copy_backward(__position, this->end(), this->end() + __dif);
+            stl::uninitialized_copy(__first, __last, __position);
+            this->_M_imp._M_finish = __old_iter + __dif;
+            return __position;
+        } else{
+            /// Run Out Of Memory
+            const size_type _old_size = this->size();
+            /// DONE_TODO : Replace std::max() to stl::max()
+            const size_type _new_size = _old_size + stl::max(__dif, _old_size);
+            pointer new_start = this->get_allocator().allocate(_new_size);
+            pointer new_finish = new_start;
+            /// Processed Exception
+            try {
+                new_finish = stl::uninitialized_copy(this->begin(), __position, new_start);
+                new_finish = stl::uninitialized_copy(__first, __last, new_finish);
+                new_finish = stl::uninitialized_copy(__position, this->end(), new_finish);
+            } catch (...) {
+                stl::_Destroy(new_start, new_finish);
+                this->get_allocator().deallocate(new_start, _new_size);
+                throw ;
+            }
+            /// Destroy and Deallocate Previous Memory
+            this->_M_Clear();
+            /// Reset pointer
+            this->_M_imp._M_start = new_start;
+            this->_M_imp._M_finish = new_finish;
+            this->_M_imp._M_end_of_storage = new_start + _new_size;
+
+            return __position;
+        }
+    }
+    template<typename _Tp, typename _Alloc>
+    typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>
+            ::_M_Fill_insert(const_iterator __position, size_type __n, const value_type &__val){
+                if(__n == 0)
+                    return __position;
+                /// Insert Operation
+                /// Have Enough Memory to insert
+                if (size_type (this->capacity() - this->size()) >= __n){
+#ifdef VECTOR_DBG
+                    std::cout<<"Have Enough Memory to insert"<<std::endl;
+#endif
+                    iterator old_end = this->end();
+                    /// TODO : Replace std::copy_backward to stl::copy_backward
+                    std::copy_backward(__position, this->end(), old_end + __n);
+                    stl::uninitialized_fill_n(__position, __n, __val);
+                    this->_M_imp._M_finish = old_end.base() + __n;
+                    return __position;
+
+                } else{
+#ifdef VECTOR_DBG
+                    std::cout<<"Memory Have Run Out"<<std::endl;
+#endif
+                    /// Memory Have Run Out
+                    const size_type _old_size = this->size();
+                    /// DONE_TODO : Replace std::max() to stl::max()
+                    const size_type _new_size = _old_size + stl::max(__n, _old_size);
+                    pointer new_start = this->get_allocator().allocate(_new_size);
+                    pointer new_finish = new_start;
+                    /// Processed Exception
+                    try {
+                        new_finish = stl::uninitialized_copy(this->begin(), __position, new_start);
+                        new_finish = stl::uninitialized_fill_n(new_finish, __n, __val);
+                        new_finish = stl::uninitialized_copy(__position, this->end(), new_finish);
+                    } catch (...) {
+                        stl::_Destroy(new_start, new_finish);
+                        this->get_allocator().deallocate(new_start, _new_size);
+                        throw ;
+                    }
+                    /// Destroy and Deallocate Previous Memory
+                    this->_M_Clear();
+                    /// Reset pointer
+                    this->_M_imp._M_start = new_start;
+                    this->_M_imp._M_finish = new_finish;
+                    this->_M_imp._M_end_of_storage = new_start + _new_size;
+
+                    return __position;
+                }
+            }
+    template<typename _Tp, typename _Alloc>
+    typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>
+            ::insert(const_iterator _position, size_type _n, const value_type &_val) {
+        return this->_M_Fill_insert(_position, _n, _val);
+    }
+    template<typename _Tp, typename _Alloc>
+    typename vector<_Tp, _Alloc>::iterator vector<_Tp, _Alloc>
+            ::insert(const_iterator _position, const_iterator _first, const_iterator _last) {
+        return this->template _M_Copy_insert(_position, _first, _last);
+    }
+    template<typename _Tp, typename _Alloc>
+    void vector<_Tp, _Alloc>::resize(size_type new_size) {
+        this->resize(new_size, value_type());
+    }
+    template<typename _Tp, typename _Alloc>
+    void vector<_Tp, _Alloc>::resize(size_type new_size, const value_type &_val) {
+        if (new_size == this->size())
+            return;
+        if (new_size < this->size())
+            this->erase(this->begin() + new_size, this->end());
+        else
+            this->insert(this->end(), new_size - this->size(), _val);
     }
 }
 #endif //STL2_0_STL_VECTOR_H

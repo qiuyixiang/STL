@@ -45,7 +45,7 @@
 
 /// Debugger Option
 ///#define DEBUGGER
-///#define VECTOR_DBG
+#define VECTOR_DBG
 
 #include <iostream>
 #include <iterator>
@@ -56,7 +56,7 @@
 
 #include "include/iterator.h"
 #include "include/memory.h"
-#include "include/allocator.h"
+#include "include/algorithm.h"
 #include "include/functional.h"
 #include "include/sequence_container/stl_vector.h"
 
@@ -203,75 +203,11 @@ namespace utility_test{
         std::cout<<pair2.first<<" "<<pair2.second<<std::endl;
     }
 }
+
+/// sequence container test unit
+/// use Macro DISPLAY and DISPLAY_DBG
 namespace sequence_container_test{
-    /// sequence container test unit
-    /// use Macro DISPLAY and DISPLAY_DBG
 
-    /// test for vector
-    void vector_test_unit1(){
-        std::vector<int>std_vector = {1,2,3,4,5,6,7,8};
-        stl::allocator<int>allocator;
-
-        ///int * ptr = alloc.allocate(1);
-        __std__::_Vec_Base<int, stl::allocator<int>>vecBase;
-        vecBase.get_Tp_allocator();
-        std::allocator<int>allocator1;
-        ///allocator1.deallocate();
-        std_vector.begin();
-        std_vector.back();
-        std_vector.empty();
-        stl::vector<int>vector(10);
-        std::cout<<std::endl;
-        vector.display(true);
-        stl::vector<int>vector1(10, 10);
-        vector1.display(true);
-        std::cout<<vector1.front()<<" "<<vector1.back()<<std::endl;
-        stl::vector<int>vector2 = {1,2,3,4,5,6,7,8};
-        vector2.display(true);
-        stl::vector<double>vector3(10);
-        std::cout<<vector2.max_size()<<" "<<vector3.max_size()<<std::endl;
-        stl::vector<int>vector4(vector2);
-        vector4.display(true);
-    }
-
-    void vector_test_unit2(){
-        stl::vector<int>std_vector(10, 5);
-        stl::vector<int>std_vector1(std::move(std_vector));
-
-        std_vector1.display(true);
-        std_vector.display(true);
-
-        stl::vector<int>vector = {1,2,3,4,5,6,7};
-        stl::vector<int>vector1;
-        vector = std::move(vector1);
-
-        vector.display(true);
-        vector1.display(true);
-
-        std::vector<int>vector2 = {1,2,3,4,5,6,7};
-        std::vector<int>vector3;
-
-        vector3 = std::move(vector2);
-        DISPLAY_DBG(vector2);
-        std::cout<<vector2.capacity()<<std::endl;
-        stl::vector<int>vector4 = {1,2,3,4,5,6,7};
-        stl::vector<int>vector5;
-        vector5 = std::move(vector4);
-        vector5.display(true);
-        vector4.display(true);
-
-        stl::vector<int>vector6;
-        vector6 = {1,2,3,4,5,6,7,8};
-        vector6.display(true);
-        vector6 = stl::vector<int>();
-        vector6.display(true);
-
-        std::vector<int>vector7;
-        int number = 100;
-        vector7.push_back(10);
-        vector7.push_back(number);
-        vector7.emplace_back(100);
-    }
     class Container_class {
     public:
         int _cs;
@@ -281,33 +217,170 @@ namespace sequence_container_test{
         ~Container_class() = default;
 
     };
-    void vector_test_unit3(){
-        stl::vector<int>group;
-        group.push_back(10);
-        group.push_back(20);
-        group.emplace_back(30);
-        group.emplace_back(40);
-        group.emplace_back(50);
+    /// test for vector
+    namespace vector_test{
+        void vector_test_unit1(){
+            std::vector<int>std_vector = {1,2,3,4,5,6,7,8};
+            stl::allocator<int>allocator;
 
-        stl::vector<Container_class> group_cl;
-        group_cl.emplace_back(10 ,"Hello");
-        std::cout<<group_cl.size()<<std::endl;
-        std::cout<<group_cl[0]._cs<<" "<<group_cl[0]._ifn<<std::endl;
-        group_cl.push_back(Container_class(10, "Test"));
-        std::cout<<group_cl.size()<<" "<<group_cl.capacity()<<std::endl;
-        std::cout<<BREAK<<std::endl;
-        stl::vector<int>hr = {1,2,3,4,5,6,7,8};
-        hr.erase(hr.begin() + 3);
-        hr.display(true);
-        hr.pop_back();
-        hr.display(true);
-        hr.erase(hr.begin() + 1, hr.begin() + 3);
-        hr.display(true);
-        std::vector<int>any = {1,2,3};
-        any.shrink_to_fit();
+            ///int * ptr = alloc.allocate(1);
+            __std__::_Vec_Base<int, stl::allocator<int>>vecBase;
+            vecBase.get_Tp_allocator();
+            std::allocator<int>allocator1;
+            ///allocator1.deallocate();
+            std_vector.begin();
+            std_vector.back();
+            std_vector.empty();
+            stl::vector<int>vector(10);
+            std::cout<<std::endl;
+            vector.display(true);
+            stl::vector<int>vector1(10, 10);
+            vector1.display(true);
+            std::cout<<vector1.front()<<" "<<vector1.back()<<std::endl;
+            stl::vector<int>vector2 = {1,2,3,4,5,6,7,8};
+            vector2.display(true);
+            stl::vector<double>vector3(10);
+            std::cout<<vector2.max_size()<<" "<<vector3.max_size()<<std::endl;
+            stl::vector<int>vector4(vector2);
+            vector4.display(true);
+        }
+
+        void vector_test_unit2(){
+            stl::vector<int>std_vector(10, 5);
+            stl::vector<int>std_vector1(std::move(std_vector));
+
+            std_vector1.display(true);
+            std_vector.display(true);
+
+            stl::vector<int>vector = {1,2,3,4,5,6,7};
+            stl::vector<int>vector1;
+            vector = std::move(vector1);
+
+            vector.display(true);
+            vector1.display(true);
+
+            std::vector<int>vector2 = {1,2,3,4,5,6,7};
+            std::vector<int>vector3;
+
+            vector3 = std::move(vector2);
+            DISPLAY_DBG(vector2);
+            std::cout<<vector2.capacity()<<std::endl;
+            stl::vector<int>vector4 = {1,2,3,4,5,6,7};
+            stl::vector<int>vector5;
+            vector5 = std::move(vector4);
+            vector5.display(true);
+            vector4.display(true);
+
+            stl::vector<int>vector6;
+            vector6 = {1,2,3,4,5,6,7,8};
+            vector6.display(true);
+            vector6 = stl::vector<int>();
+            vector6.display(true);
+
+            std::vector<int>vector7;
+            int number = 100;
+            vector7.push_back(10);
+            vector7.push_back(number);
+            vector7.emplace_back(100);
+        }
+
+        void vector_test_unit3(){
+            stl::vector<int>group;
+            group.push_back(10);
+            group.push_back(20);
+            group.emplace_back(30);
+            group.emplace_back(40);
+            group.emplace_back(50);
+
+            stl::vector<Container_class> group_cl;
+            group_cl.emplace_back(10 ,"Hello");
+            std::cout<<group_cl.size()<<std::endl;
+            std::cout<<group_cl[0]._cs<<" "<<group_cl[0]._ifn<<std::endl;
+            group_cl.push_back(Container_class(10, "Test"));
+            std::cout<<group_cl.size()<<" "<<group_cl.capacity()<<std::endl;
+            std::cout<<BREAK<<std::endl;
+            stl::vector<int>hr = {1,2,3,4,5,6,7,8};
+            hr.erase(hr.begin() + 3);
+            hr.display(true);
+            hr.pop_back();
+            hr.display(true);
+            hr.erase(hr.begin() + 1, hr.begin() + 3);
+            hr.display(true);
+            std::vector<int>any = {1,2,3};
+            any.shrink_to_fit();
+
+            any.insert(any.begin() + 1, 5, 6);
+        }
+        void vector_test_unit4(){
+            std::vector<int>group = {1,2,3,4,5,6,7,8,9,10};
+            std::vector<int>group1(group.size());
+
+            group.shrink_to_fit();
+
+            auto result = std::copy_backward(group.begin(), group.end(), group1.end());
+            std::cout<<*result<<std::endl;
+            DISPLAY(group1.begin(), group1.end());
+            ///std::cout<<BREAK<<std::endl;
+
+            stl::vector<int>group2 = {1,2,3,4,5,6,7,8,9,10};
+            stl::vector<int>group3(group2.begin(), group2.end());
+            group3.display(true);
+            stl::vector<int>group4(group.begin(), group.end());
+            group4.display(true);
+            std::cout<<BREAK<<std::endl;
+
+            group.insert(group.begin() + 3, 3, 4);
+            DISPLAY_DBG(group);
+            std::cout<<BREAK<<std::endl;
+
+            group4.push_back(11);
+            group4.display(true);
+            group4.insert(group4.begin() + 3, 3, 4);
+            group4.display(true);
+
+            group4.insert(group4.begin() + 3, 21, 4);
+            group4.display(true);
+
+            group4.push_back(100);
+            group4.display(true);
+
+            std::cout<<BREAK<<BREAK<<std::endl;
+
+            stl::vector<char>v_char = {'q', 'y', 'x'};
+            stl::vector<char>v_char1;
+            v_char1.insert(v_char1.begin(), v_char.begin(), v_char.end());
+            v_char1.display(true);
+            v_char1.push_back('x');
+            v_char1.push_back('x');
+            v_char1.push_back('x');
+            v_char1.push_back('x');
+            v_char1.display(true);
+            v_char1.insert(v_char1.begin() + 1, v_char.begin(), v_char.end());
+            v_char1.display(true);
+            char temp = 's';
+            v_char1.insert(v_char1.end(), temp);
+            v_char1.display(true);
+            v_char1.insert(v_char1.end(), std::initializer_list<char>{'d', 'w'});
+            v_char1.display(true);
+            std::cout<<BREAK<<BREAK<<BREAK<<std::endl;
+            stl::vector<int>groups = {1,2,3,4,5,6,7,8,9,10};
+            groups.insert(groups.begin() + 2, 3);
+            groups.display(true);
+            groups.insert(groups.begin() + 2, 3);
+            groups.display(true);
+
+            groups.shrink_to_fit();
+            groups.display(true);
+            groups.resize(10);
+            groups.display(true);
+            groups.resize(15, 9);
+            groups.display(true);
+        }
     }
-    void deque_test_unit(){
-        std::deque<int>std_deque;
+
+    /// test for deque
+    namespace deque_test{
+
     }
 
 }
@@ -323,9 +396,10 @@ int main(int argc, char ** argv){
     ///iterator_test::stream_iterator_test();
     ///utility_test::pair_test();
     ///functor_test::functor_mem_test();
-    ///sequence_container_test::vector_test_unit1();
-    ///sequence_container_test::vector_test_unit2();
-    sequence_container_test::vector_test_unit3();
+//    sequence_container_test::vector_test::vector_test_unit1();
+//    sequence_container_test::vector_test::vector_test_unit2();
+//    sequence_container_test::vector_test::vector_test_unit3();
+    sequence_container_test::vector_test::vector_test_unit4();
 
     return 0;
 }
