@@ -75,8 +75,8 @@ namespace __std__{
         explicit _STL_USE_CONSTEXPR _list_iterator(list_node_ptr _Other) _STL_NO_EXCEPTION
                 : _M_node_ptr(_Other) { }
         explicit _STL_USE_CONSTEXPR _list_iterator( _list_node_base * _Other) : _M_node_ptr(_Other) {  }
-        explicit _STL_USE_CONSTEXPR _list_iterator(const _list_node_base * _Other) : _M_node_ptr(
-                const_cast<_list_node_base *>(_Other)) {  }
+        explicit _STL_USE_CONSTEXPR _list_iterator(const _list_node_base * _Other)
+            : _M_node_ptr(const_cast<_list_node_base *>(_Other)) {  }
         _STL_USE_CONSTEXPR _list_iterator(const list_iterator& _Other) : _M_node_ptr(_Other.base()) {  }
         ~_list_iterator() = default;
 
@@ -223,12 +223,25 @@ namespace stl{
         void _M_free_Node(list_node_type * _Tar);
         void _M_empty_initialized();
 
+        template<typename... _Args>
+        iterator _M_insert(const_iterator __pos, _Args&&...__args);
+
+        template<typename _InputIterator>
+        void _M_Copy(_InputIterator __first, _InputIterator __last);
+
     public:
         /// Constructor
         list() _STL_NO_EXCEPTION {
             this->_M_empty_initialized();
         }
-
+        list(const std::initializer_list<value_type>& _Li){
+            this->_M_empty_initialized();
+            this->template _M_Copy(_Li.begin(), _Li.end());
+        }
+        list(const list& _Other) {
+            this->_M_empty_initialized();
+            this->template _M_Copy(_Other.begin(), _Other.end());
+        }
 
         /// Public Member Function
         size_type size() const _STL_NO_EXCEPTION;
@@ -238,6 +251,22 @@ namespace stl{
         reference front() _STL_NO_EXCEPTION;
         reference back() _STL_NO_EXCEPTION;
 
+        void push_back(const value_type& _val);
+        void push_back(value_type&& _val);
+
+        template<typename... _Args>
+        void emplace_back(_Args&& ..._args);
+
+        void push_front(const value_type& _val);
+        void push_front(value_type&& _val);
+
+        template<typename... _Args>
+        void emplace_front(_Args&& ..._args);
+
+        iterator insert(const_iterator _pos, const value_type& _val);
+        iterator insert(const_iterator _pos, value_type&& _val);
+
+        static iterator advance(iterator _Iter, difference_type _Diff);
 
         /// Iterator Function
         iterator begin() {  return iterator (this->_M_Base_Node._M_next);  }
@@ -318,9 +347,72 @@ namespace stl{
     void list<_Tp,  _Alloc>::display(bool flag) const noexcept {
         for (iterator _Iter = this->begin()._M_const_cast(); _Iter != this->end(); ++_Iter)
             std::cout<<*_Iter<<" ";
+        std::cout<<std::endl;
         if (flag)
             std::cout<<"Size : "<< this->size()<<std::endl;
         std::cout<<std::endl;
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp,  _Alloc>::push_back(const value_type &_val) {
+        this->template _M_insert(this->end(), _val);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp,  _Alloc>::push_back(value_type &&_val) {
+        this->template _M_insert(this->end(), std::move(_val));
+    }
+    template<typename _Tp, typename _Alloc>
+    template<typename ..._Args>
+    void list<_Tp,  _Alloc>::emplace_back(_Args &&..._args) {
+        this->template _M_insert(this->end(), std::forward<_Args>(_args)...);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp,  _Alloc>::push_front(const value_type &_val) {
+        this->template _M_insert(this->begin(), _val);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp,  _Alloc>::push_front(value_type &&_val) {
+        this->template _M_insert(this->begin(), std::move(_val));
+    }
+    template<typename _Tp, typename _Alloc>
+    template<typename ..._Args>
+    void list<_Tp,  _Alloc>::emplace_front(_Args &&..._args) {
+        this->template _M_insert(this->begin(), std::forward<_Args>(_args)...);
+    }
+    template<typename _Tp, typename _Alloc>
+    template<typename ..._Args>
+    typename list<_Tp,  _Alloc>::iterator list<_Tp,  _Alloc>::_M_insert(const_iterator __pos, _Args&&...__args) {
+        list_node_type * __temp = this->template _M_create_Node(std::forward<_Args>(__args)...);
+        __temp->_M_prev = __pos.base()->_M_prev;
+        __temp->_M_next = __pos.base();
+        __temp->_M_prev->_M_next = __temp;
+        __pos.base()->_M_prev = __temp;
+        /// Increase Size
+        this->_M_inc_size(1);
+        return iterator (__temp);
+    }
+    template<typename _Tp, typename _Alloc>
+    typename list<_Tp,  _Alloc>::iterator list<_Tp,  _Alloc>::insert(const_iterator _pos, value_type &&_val) {
+        this->template _M_insert(_pos, std::move(_val));
+    }
+    template<typename _Tp, typename _Alloc>
+    typename list<_Tp,  _Alloc>::iterator list<_Tp,  _Alloc>::insert(const_iterator _pos, const value_type &_val) {
+        this->template _M_insert(_pos, _val);
+    }
+    /// A More Convenient OverRide Advanced Function With An Return Type !
+    /// A Specialization For typename list<_Tp,  _Alloc>::iterator
+    template<typename _Tp, typename _Alloc>
+    typename list<_Tp,  _Alloc>::iterator list<_Tp,  _Alloc>::advance(iterator _Iter, difference_type _Diff) {
+        /// Invoke Standard Advance
+        typename list<_Tp,  _Alloc>::iterator __temp = _Iter;
+        stl::advance(__temp, _Diff);
+        return __temp;
+    }
+    template<typename _Tp, typename _Alloc>
+    template<typename _InputIterator>
+    void list<_Tp, _Alloc>::_M_Copy(_InputIterator __first, _InputIterator __last){
+        for ( ; __first != __last ; ++__first){
+            this->template _M_insert(this->end(), *__first);
+        }
     }
 }
 #endif //STL2_0_STL_LIST_H

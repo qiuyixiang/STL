@@ -394,6 +394,24 @@ namespace sequence_container_test{
             group.begin();
             stl::list<int>groups;
             groups.display();
+            group.push_back(100);
+            std::cout<<groups.back()<<std::endl;
+            std::cout<<groups.front()<<std::endl;
+            std::cout<<BREAK<<std::endl;
+            groups.push_back(100);
+            groups.push_back(number);
+            groups.emplace_back(1000);
+            groups.push_front(10);
+            groups.emplace_front(1);
+            auto Iter = groups.begin();
+            stl::advance(Iter, 3);
+            groups.insert(Iter, 99);
+            groups.insert(stl::list<int>::advance(groups.begin(), 3), 9);
+            groups.display();
+
+            stl::list<int>group1 = {1,2,3,4,5,6,7,8,9};
+            group1.display();
+            group = std::initializer_list<int>{1,2,3,4,5,6,7};
         }
     }
 
