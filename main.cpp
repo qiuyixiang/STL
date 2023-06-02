@@ -53,12 +53,14 @@
 #include <functional>
 #include <memory>
 #include <deque>
+#include <list>
 
 #include "include/iterator.h"
 #include "include/memory.h"
 #include "include/algorithm.h"
 #include "include/functional.h"
-#include "include/sequence_container/stl_vector.h"
+#include "include/vector.h"
+#include "include/list.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -383,6 +385,18 @@ namespace sequence_container_test{
 
     }
 
+    /// test for list
+    namespace list_test{
+        void list_test_unit1(){
+            std::list<int>group;
+            int number = 100;
+            std::list<int>::pointer ptr = &number;
+            group.begin();
+            stl::list<int>groups;
+            groups.display();
+        }
+    }
+
 }
 int main(int argc, char ** argv){
 
@@ -396,10 +410,12 @@ int main(int argc, char ** argv){
     ///iterator_test::stream_iterator_test();
     ///utility_test::pair_test();
     ///functor_test::functor_mem_test();
-//    sequence_container_test::vector_test::vector_test_unit1();
-//    sequence_container_test::vector_test::vector_test_unit2();
-//    sequence_container_test::vector_test::vector_test_unit3();
-    sequence_container_test::vector_test::vector_test_unit4();
 
+    ///sequence_container_test::vector_test::vector_test_unit1();
+    ///sequence_container_test::vector_test::vector_test_unit2();
+    ///sequence_container_test::vector_test::vector_test_unit3();
+    ///sequence_container_test::vector_test::vector_test_unit4();
+
+    sequence_container_test::list_test::list_test_unit1();
     return 0;
 }
