@@ -46,6 +46,7 @@
 /// Debugger Option
 ///#define DEBUGGER
 #define VECTOR_DBG
+///#define LIST_MEMORY_DEBUGGER
 
 #include <iostream>
 #include <iterator>
@@ -411,7 +412,61 @@ namespace sequence_container_test{
 
             stl::list<int>group1 = {1,2,3,4,5,6,7,8,9};
             group1.display();
-            group = std::initializer_list<int>{1,2,3,4,5,6,7};
+            ///group = std::initializer_list<int>{1,2,3,4,5,6,7};
+            group1.erase(group1.begin());
+            group1.display();
+        }
+        void list_test_unit2(){
+            stl::list<int>list1 = {1,2,3,4,5,6};
+//            list1.clear();
+//            list1.display();
+
+            std::list<int>group = {1,2,3,4,5,6,7};
+            std::list<int>group1;
+            group1 = std::move(group);
+
+            stl::list<int>list2 = std::move(list1);
+            list1.display();
+            list2.display();
+            std::cout<<BREAK<<std::endl;
+
+            stl::list<int>list3;
+            list3 = std::move(list2);
+            list3.display();
+            list2.display();
+            std::cout<<BREAK<<std::endl;
+
+            stl::list<int>list4 = {1,2,2,2,3,3,4,5};
+            list4.display();
+            list4.remove(2);
+            list4.display();
+            std::cout<<BREAK<<std::endl;
+
+            stl::list<int>list5 = {1,2,2,2,3,3,4,5,5,6};
+            list5.display();
+            list5.unique();
+            list5.display();
+            std::cout<<BREAK<<std::endl;
+
+            stl::list<int>list = {1,1,1,2,2,3,4,5,5,6,6,7};
+            list.unique();
+            list.display();
+        }
+        void list_test_unit3(){
+            stl::list<int>list = {1,2,3,4,5};
+            stl::list<int>list1 = {6,7,8,9,10};
+
+            std::list<int>list2 = {1,2,3,4,5,6};
+            list2.sort();
+            list1.splice(list1.begin(), list);
+            list.display();
+            list1.display();
+
+            stl::list<int>list3 = {1,2,3,4,5};
+            list1.splice(list1.end(), list3, list3.begin(),
+                         stl::list<int, stl::allocator<int>>::advance(list3.begin(), 3));
+            list1.display();
+            list3.display();
         }
     }
 
@@ -434,6 +489,8 @@ int main(int argc, char ** argv){
     ///sequence_container_test::vector_test::vector_test_unit3();
     ///sequence_container_test::vector_test::vector_test_unit4();
 
-    sequence_container_test::list_test::list_test_unit1();
+    ///sequence_container_test::list_test::list_test_unit1();
+    ///sequence_container_test::list_test::list_test_unit2();
+    sequence_container_test::list_test::list_test_unit3();
     return 0;
 }

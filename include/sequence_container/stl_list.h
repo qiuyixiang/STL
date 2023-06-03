@@ -14,6 +14,20 @@
 #include "../iterator/iterator_traits.h"
 #include "../allocator/allocator_traits.h"
 
+
+/**
+ * This Macro Control List's Operator= ()
+ * The First Version is Just Deallocate Old Memory And
+ * Allocate A New Malloc Don't Do Some Special Operation
+ * And The Efficiency Is Not Very High !
+ */
+
+/// Control Macro
+#define USE_SIMPLE_OPERATOR_EQUAL
+
+/// Not Supported Yet !
+///#define USE_AMENDMENT_OPERATOR_EQUAL
+
 namespace __std__{
 
     /// _list_node_base
@@ -139,7 +153,7 @@ namespace __std__{
         typedef __std__::_list_node_<_Tp> * list_node_ptr_type;
         typedef stl::size_t size_type;
 
-    protected:
+    public:
         /// Only Data Member Not A Pointer
         /**
          * Parameter :
@@ -163,6 +177,7 @@ namespace __std__{
             return rebind_allocator_type ();
         }
 
+    public:
         size_type _M_get_size() const {  return this->_M_Base_Node.get_val(); }
         void _M_inc_size(size_type __n) {  (*this->_M_Base_Node.get_valptr()) += __n;  }
         void _M_dec_size(size_type __n) {  (*this->_M_Base_Node.get_valptr()) -= __n;  }
@@ -176,6 +191,8 @@ namespace __std__{
 namespace stl{
 
     /// The Implementation Of stl::list
+
+    /// Bidirectional Circulation Linked List
     template<typename _Tp, typename _Alloc = stl::default_allocator<_Tp>>
     class list : protected __std__::_List_Base<_Tp, _Alloc>{
     public:
@@ -229,6 +246,13 @@ namespace stl{
         template<typename _InputIterator>
         void _M_Copy(_InputIterator __first, _InputIterator __last);
 
+        void _M_Clear();
+        void _M_move_Node(__std__::_List_Base<_Tp, _Alloc>&& _Tar);
+
+        void _M_Transfer(iterator __position, iterator __first, iterator __last);
+        void transfer(iterator _position, iterator _first, iterator _last);
+        void _M_List_Sort();
+
     public:
         /// Constructor
         list() _STL_NO_EXCEPTION {
@@ -242,6 +266,15 @@ namespace stl{
             this->_M_empty_initialized();
             this->template _M_Copy(_Other.begin(), _Other.end());
         }
+        list(list&& _Other){
+            this->_M_move_Node(std::move(_Other));
+        }
+        /// Destructor
+        ~list();
+
+        /// Operator =
+        list& operator=(const list<_Tp, _Alloc>& _Other);
+        list& operator=(list<_Tp, _Alloc>&& _Other);
 
         /// Public Member Function
         size_type size() const _STL_NO_EXCEPTION;
@@ -267,6 +300,23 @@ namespace stl{
         iterator insert(const_iterator _pos, value_type&& _val);
 
         static iterator advance(iterator _Iter, difference_type _Diff);
+
+        iterator erase(const_iterator _Pos);
+
+        void pop_back();
+        void pop_front();
+        void clear();
+
+        void remove(const value_type& _Val);
+        void unique();
+
+        void splice(iterator _pos, list& __x);
+        void splice(iterator _pos, list& __x, iterator _first);
+        void splice(iterator _pos, list& __x, iterator _first, iterator _last);
+
+        void merge(list& _Other);
+        void reverse();
+        void sort();
 
         /// Iterator Function
         iterator begin() {  return iterator (this->_M_Base_Node._M_next);  }
@@ -414,5 +464,191 @@ namespace stl{
             this->template _M_insert(this->end(), *__first);
         }
     }
+    template<typename _Tp, typename _Alloc>
+    typename list<_Tp,  _Alloc>::iterator list<_Tp,  _Alloc>::erase(const_iterator _Pos) {
+        list_node_base_type *__temp = _Pos.base()->_M_next;
+        _Pos.base()->_M_next->_M_prev = _Pos.base()->_M_prev;
+        _Pos.base()->_M_prev->_M_next = _Pos.base()->_M_next;
+        this->_M_destroy_Node(static_cast<list_node_type*>(_Pos.base()));
+        this->_M_dec_size(1);
+        return iterator (__temp);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp,  _Alloc>::pop_back() {
+        this->erase((--this->end()));
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp,  _Alloc>::pop_front() {
+        this->erase(this->begin());
+    }
+    /// Do Really Clear Operation
+    template<typename _Tp, typename _Alloc>
+    list<_Tp,  _Alloc>::~list<_Tp, _Alloc>() {
+        if (!this->empty())
+            this->_M_Clear();
+        else{
+#ifdef LIST_MEMORY_DEBUGGER
+            std::cout<<"List Destructor Doing Nothing"<<std::endl;
+#endif
+        }
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::_M_Clear() {
+        iterator __current = this->begin();
+        while (__current != this->end()){
+            iterator __del = __current;
+            ++__current;
+            this->_M_destroy_Node(static_cast<list_node_type*>(__del.base()));
+#ifdef LIST_MEMORY_DEBUGGER
+            std::cout<<"Del : "<<*__del<<std::endl;
+#endif
+        }
+        this->_M_Base_Node._M_next = &this->_M_Base_Node;
+        this->_M_Base_Node._M_prev = &this->_M_Base_Node;
+        this->_M_set_size(0);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::clear() {
+        this->_M_Clear();
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::_M_move_Node(__std__::_List_Base<_Tp, _Alloc>&& _Tar) {
+        if (std::addressof(_Tar) == std::addressof(*this))
+            return;
+        if (_Tar._M_Base_Node._M_next == &_Tar._M_Base_Node)
+            this->_M_empty_initialized();
+        else{
+            this->_M_Base_Node._M_next = _Tar._M_Base_Node._M_next;
+            this->_M_Base_Node._M_prev = _Tar._M_Base_Node._M_prev;
+            this->_M_Base_Node._M_next->_M_prev = this->_M_Base_Node._M_prev->_M_next = &this->_M_Base_Node;
+            this->_M_set_size(_Tar._M_get_size());
+
+            /// Set Move Object to be Destructive
+            _Tar._M_Base_Node._M_next = &_Tar._M_Base_Node;
+            _Tar._M_Base_Node._M_prev = &_Tar._M_Base_Node;
+            _Tar._M_set_size(0);
+        }
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::unique() {
+        if (this->empty() || (this->size() == 1))
+            return;
+        iterator __current = this->begin();
+        while (__current != this->end()){
+            iterator __del = __current;
+            ++__current;
+            if (__current == this->end())
+                break;
+            if (*__del == *__current)
+                this->erase(__del);
+        }
+    }
+    /// Remove All Object That equals to _Val
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::remove(const value_type &_Val) {
+        if (this->empty())
+            return;
+        iterator __current = this->begin();
+        while (__current != this->end()){
+            iterator __del = __current;
+            ++__current;
+            if (*__del == _Val)
+                this->erase(__del);
+        }
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::transfer(iterator _position, iterator _first, iterator _last) {
+        this->_M_Transfer(_position, _first, _last);
+    }
+    /// Move [__first, __last) in front of __position
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::_M_Transfer(iterator __position, iterator __first, iterator __last) {
+        if (__position != __last){
+            list_node_base_type * __pos_prev = __position.base()->_M_prev;
+            list_node_base_type * __first_prev = __first.base()->_M_prev;
+            list_node_base_type * __last_prev = __last.base()->_M_prev;
+
+            __last_prev->_M_next = __position.base();
+            __first.base()->_M_prev = __pos_prev;
+            __position.base()->_M_prev = __last_prev;
+            __pos_prev->_M_next = __first.base();
+            __first_prev->_M_next = __last.base();
+            __last.base()->_M_prev = __first_prev;
+        }
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::splice(iterator _pos, list&__x) {
+        if (__x.empty())
+            return;
+        const ptrdiff_t _Diff = __std__::_List_Base<_Tp, _Alloc>::
+        _M_distance(__x.begin().base(), __x.end().base());
+        this->transfer(_pos, __x.begin(), __x.end());
+        __x._M_dec_size(_Diff);
+        this->_M_inc_size(_Diff);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::splice(iterator _pos, list<_Tp, _Alloc> &__x, iterator _first) {
+        if (__x.empty())
+            return;
+        /// Use __x.end() as default !
+        const ptrdiff_t _Diff = __std__::_List_Base<_Tp, _Alloc>::
+        _M_distance(_first.base(), __x.end().base());
+        this->transfer(_pos, _first, __x.end());
+        __x._M_dec_size(_Diff);
+        this->_M_inc_size(_Diff);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::splice(iterator _pos, list<_Tp, _Alloc> &__x, iterator _first, iterator _last) {
+        if (__x.empty())
+            return;
+        const ptrdiff_t _Diff = __std__::_List_Base<_Tp, _Alloc>::
+        _M_distance(_first.base(), _last.base());
+        this->transfer(_pos, _first, _last);
+        __x._M_dec_size(_Diff);
+        this->_M_inc_size(_Diff);
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::merge(list<_Tp, _Alloc> &_Other) {
+
+    }
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::reverse() {
+
+    }
+    /// Just An API For Public sort
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::sort() {
+        this->_M_List_Sort();
+    }
+
+    /// List Can't Use Standard Algorithm sort
+    /// Use Special Handled list::sort
+    /// Kernel Sort Way Is Merge Sort
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::_M_List_Sort() {
+        /// Merge Sort !
+    }
+    /// Use Highly Effective Way To Copy Or Move
+    /// Not Supported Yet
+#ifdef USE_AMENDMENT_OPERATOR_EQUAL
+    template<typename _Tp, typename _Alloc>
+    list<_Tp, _Alloc>& list<_Tp, _Alloc>::operator=(list<_Tp, _Alloc> &&_Other) {
+    }
+    template<typename _Tp, typename _Alloc>
+    list<_Tp, _Alloc>& list<_Tp, _Alloc>::operator=(const list<_Tp, _Alloc> &_Other) {
+    }
+#endif
+    /// Use Common Way That Deallocate Source Object Directly !
+#ifdef USE_SIMPLE_OPERATOR_EQUAL
+    template<typename _Tp, typename _Alloc>
+    list<_Tp, _Alloc>& list<_Tp, _Alloc>::operator=(list<_Tp, _Alloc> &&_Other) {
+        this->_M_move_Node(std::move(_Other));
+    }
+    template<typename _Tp, typename _Alloc>
+    list<_Tp, _Alloc>& list<_Tp, _Alloc>::operator=(const list<_Tp, _Alloc> &_Other) {
+        this->_M_Clear();
+        this->template _M_Copy(_Other.begin(), _Other.end());
+    }
+#endif
 }
 #endif //STL2_0_STL_LIST_H
