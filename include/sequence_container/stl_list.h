@@ -252,7 +252,6 @@ namespace stl{
         void _M_Transfer(iterator __position, iterator __first, iterator __last);
         void transfer(iterator _position, iterator _first, iterator _last);
         void _M_List_Sort();
-//        void _M_Transfer_One_element(iterator _Pos, )
 
     public:
         /// Constructor
@@ -316,6 +315,9 @@ namespace stl{
         void splice(iterator _pos, list& __x, iterator _first, iterator _last);
 
         void merge(list& _Other);
+        template<typename _Compare>
+        void merge(list& _Other, _Compare _compare);
+
         void reverse();
         void sort();
 
@@ -591,12 +593,12 @@ namespace stl{
     void list<_Tp, _Alloc>::splice(iterator _pos, list<_Tp, _Alloc> &__x, iterator _first) {
         if (__x.empty())
             return;
-        /// Use __x.end() as default !
-        const ptrdiff_t _Diff = __std__::_List_Base<_Tp, _Alloc>::
-        _M_distance(_first.base(), __x.end().base());
-        this->transfer(_pos, _first, __x.end());
-        __x._M_dec_size(_Diff);
-        this->_M_inc_size(_Diff);
+        /// splice from _first to _first + 1
+        auto _Iter = _first;
+        ++_Iter;
+        this->transfer(_pos, _first, _Iter);
+        __x._M_dec_size(1);
+        this->_M_inc_size(1);
     }
     template<typename _Tp, typename _Alloc>
     void list<_Tp, _Alloc>::splice(iterator _pos, list<_Tp, _Alloc> &__x, iterator _first, iterator _last) {
@@ -608,13 +610,68 @@ namespace stl{
         __x._M_dec_size(_Diff);
         this->_M_inc_size(_Diff);
     }
+    /// Merge Tow List That Must Be Ordered Beforehand !
+    /// Kernel Algorithm is Merge Sort !
     template<typename _Tp, typename _Alloc>
-    void list<_Tp, _Alloc>::merge(list<_Tp, _Alloc> &_Other) {
+    void list<_Tp, _Alloc>::merge(list&_Other) {
+        /// 1,3,5,7,9   first1
+        /// 2,4,6,8,10  first2
+        if (_Other.empty())
+            return;
+        iterator __first1 = this->begin();
+        iterator __last1 = this->end();
+        iterator __first2 = _Other.begin();
+        iterator __last2 = _Other.end();
 
+        while (__first1 != __last1 && __first2 != __last2){
+            if (*__first2 < *__first1){
+                auto __temp = __first2;
+                this->_M_Transfer(__first1, __first2, ++__temp);
+                __first2 = __temp;
+            } else
+                ++__first1;
+        }
+        if (__first2 != __last2)
+            this->_M_Transfer(__last1, __first2, __last2);
+
+        this->_M_inc_size(_Other.size());
+        _Other._M_set_size(0);
     }
     template<typename _Tp, typename _Alloc>
-    void list<_Tp, _Alloc>::reverse() {
+    template<typename _Compare>
+    void list<_Tp, _Alloc>::merge(list& _Other, _Compare _compare){
+        if (_Other.empty())
+            return;
+        iterator __first1 = this->begin();
+        iterator __last1 = this->end();
+        iterator __first2 = _Other.begin();
+        iterator __last2 = _Other.end();
 
+        while (__first1 != __last1 && __first2 != __last2){
+            if (_compare(*__first2, *__first1)){
+                auto __temp = __first2;
+                this->_M_Transfer(__first1, __first2, ++__temp);
+                __first2 = __temp;
+            } else
+                ++__first1;
+        }
+        if (__first2 != __last2)
+            this->_M_Transfer(__last1, __first2, __last2);
+
+        this->_M_inc_size(_Other.size());
+        _Other._M_set_size(0);
+    }
+
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::reverse() {
+        /// Transfer Each Element To The Front Of List Sequence
+        auto __current = this->begin();
+        ++__current;
+        while (__current != this->end()){
+            auto __old_iter = __current;
+            ++__current;
+            this->transfer(this->begin(), __old_iter, __current);
+        }
     }
     /// Just An API For Public sort
     template<typename _Tp, typename _Alloc>

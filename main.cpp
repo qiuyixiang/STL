@@ -468,6 +468,27 @@ namespace sequence_container_test{
             list1.display();
             list3.display();
             list2.sort();
+            std::cout<<BREAK<<std::endl;
+
+            stl::list<int>group = {1,2,3,4,5,6,7};
+            stl::list<int>group1 = group;
+            group1.display();
+            group1.splice(group1.begin(), group, group.begin());
+            group.display();
+            group1.display();
+        }
+        void list_test_unit4(){
+            std::list<int>list = {1,2,3,4,5,6};
+            /// 1,3,5,7,9   first1
+            /// 2,4,6,8,10  first2
+            stl::list<int>list1 = {1,3,5,7,9};
+            stl::list<int>list2 = {2,4,6,8,10};
+
+            list2.merge(list1);
+            list2.display();
+            list1.display();
+            list2.reverse();
+            list2.display();
         }
     }
 
@@ -492,6 +513,7 @@ int main(int argc, char ** argv){
 
     ///sequence_container_test::list_test::list_test_unit1();
     ///sequence_container_test::list_test::list_test_unit2();
-    sequence_container_test::list_test::list_test_unit3();
+    ///sequence_container_test::list_test::list_test_unit3();
+    sequence_container_test::list_test::list_test_unit4();
     return 0;
 }
