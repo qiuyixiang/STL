@@ -467,6 +467,7 @@ namespace sequence_container_test{
                          stl::list<int, stl::allocator<int>>::advance(list3.begin(), 3));
             list1.display();
             list3.display();
+            list2.sort();
         }
     }
 

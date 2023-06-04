@@ -252,6 +252,7 @@ namespace stl{
         void _M_Transfer(iterator __position, iterator __first, iterator __last);
         void transfer(iterator _position, iterator _first, iterator _last);
         void _M_List_Sort();
+//        void _M_Transfer_One_element(iterator _Pos, )
 
     public:
         /// Constructor
