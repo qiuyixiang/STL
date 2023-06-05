@@ -540,7 +540,7 @@ namespace stl{
             /// Run Out Of Memory
             const size_type _old_size = this->size();
             /// DONE_TODO : Replace std::max() to stl::max()
-            const size_type _new_size = _old_size + stl::max(__dif, _old_size);
+            const size_type _new_size = _old_size + stl::max((size_t)__dif, _old_size);
             pointer new_start = this->get_allocator().allocate(_new_size);
             pointer new_finish = new_start;
             /// Processed Exception

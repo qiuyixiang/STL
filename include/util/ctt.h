@@ -27,7 +27,7 @@
 namespace stl{
     /// Base type define
     typedef unsigned int size_t;
-    typedef stl::size_t ptrdiff_t;
+    typedef signed int ptrdiff_t;
 
 }
 

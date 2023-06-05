@@ -55,6 +55,7 @@
 #include <memory>
 #include <deque>
 #include <list>
+#include <forward_list>
 
 #include "include/iterator.h"
 #include "include/memory.h"
@@ -62,6 +63,7 @@
 #include "include/functional.h"
 #include "include/vector.h"
 #include "include/list.h"
+#include "include/forward_list.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -506,6 +508,40 @@ namespace sequence_container_test{
         }
     }
 
+    ///test for forward_list
+    namespace forward_list_test{
+        void forward_list_test_unit1(){
+            std::forward_list<int>forwardList = {1,2,3,4,5,6,7};
+            forwardList.before_begin();
+            stl::forward_list<int>forwardList1;
+            forwardList1.display(true);
+            std::cout<<stl::allocator<int>().max_size()<<std::endl;
+            std::cout<<forwardList1.max_size()<<std::endl;
+            std::cout<<stl::allocator<double>().max_size()<<std::endl;
+            forwardList.pop_front();
+            std::cout<<BREAK<<std::endl;
+            forwardList1.push_front(10);
+            forwardList1.push_front(0);
+            forwardList1.display(true);
+            std::cout<<BREAK<<std::endl;
+            stl::forward_list<int>forwardList2 = {1,2,3,4,5,6};
+            forwardList2.display(true);
+            std::cout<<std::endl;
+            auto Iter = forwardList2.erase_after(forwardList2.before_begin());
+            forwardList2.display(true);
+            std::cout<<*Iter<<std::endl;
+            std::cout<<forwardList2.front()<<std::endl;
+            std::cout<<std::boolalpha<<forwardList2.empty()<<std::endl;
+            stl::forward_list<int>forwardList3;
+            std::cout<<std::boolalpha<<forwardList3.empty()<<std::endl;
+        }
+        void forward_list_test_unit2(){
+            stl::forward_list<int>list = {1,2,3,4,5,6,7,8};
+            list.clear();
+            list.display(true);
+        }
+    }
+
 }
 int main(int argc, char ** argv){
 
@@ -528,6 +564,9 @@ int main(int argc, char ** argv){
     ///sequence_container_test::list_test::list_test_unit1();
     ///sequence_container_test::list_test::list_test_unit2();
     ///sequence_container_test::list_test::list_test_unit3();
-    sequence_container_test::list_test::list_test_unit4();
+    ///sequence_container_test::list_test::list_test_unit4();
+
+    ///sequence_container_test::forward_list_test::forward_list_test_unit1();
+    sequence_container_test::forward_list_test::forward_list_test_unit2();
     return 0;
 }
