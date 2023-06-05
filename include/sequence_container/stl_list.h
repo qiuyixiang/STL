@@ -28,6 +28,10 @@
 /// Not Supported Yet !
 ///#define USE_AMENDMENT_OPERATOR_EQUAL
 
+/// Control stl::list::sort version
+/// Algorithm Controller !
+#define USE_SIMPLE_LIST_SORT
+
 namespace __std__{
 
     /// _list_node_base
@@ -685,6 +689,30 @@ namespace stl{
     template<typename _Tp, typename _Alloc>
     void list<_Tp, _Alloc>::_M_List_Sort() {
         /// Merge Sort !
+
+        /// Old Version Of Sort This Version is not
+        /// Same As C++ Standard Library's std::list::sort
+        /// This Kind Of Sort is More Simple But With less efficiency
+
+        /// std::list::sort has O(nlog2(n)) Time Complexity
+
+#ifdef USE_SIMPLE_OPERATOR_EQUAL
+        /// Simple Version Waste Of A Bit Memory !
+        list __buffer;
+        list __compare;
+        while (!this->empty()){
+            if (__compare.empty() && __buffer.empty()){
+                __compare.splice(__compare.begin(), *this, this->begin());
+                __buffer.splice(__buffer.begin(), *this, this->begin());
+            } else
+                __compare.splice(__compare.begin(), *this, this->begin());
+            __buffer.merge(__compare);
+        }
+        *this = __buffer;
+        /// TODO Update Sort Version To Sync Wit Standard Library !!!
+#else
+
+#endif
     }
     /// Use Highly Effective Way To Copy Or Move
     /// Not Supported Yet

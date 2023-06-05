@@ -489,6 +489,11 @@ namespace sequence_container_test{
             list1.display();
             list2.reverse();
             list2.display();
+            std::cout<<BREAK<<std::endl;
+
+            stl::list<int>group = {2,5,1,3,4,8,7,9};
+            group.sort();
+            group.display();
         }
     }
 
