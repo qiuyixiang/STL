@@ -43,6 +43,11 @@ namespace __std__{
         _list_node_base() : _M_next(nullptr), _M_prev(nullptr) {  };
     };
 
+    void swap(_list_node_base& __l, _list_node_base __r){
+        stl::swap(__l._M_next, __r._M_next);
+        stl::swap(__l._M_prev, __r._M_prev);
+    }
+
     /// _list_node
 
     template<typename _Tp>
@@ -186,7 +191,6 @@ namespace __std__{
         void _M_inc_size(size_type __n) {  (*this->_M_Base_Node.get_valptr()) += __n;  }
         void _M_dec_size(size_type __n) {  (*this->_M_Base_Node.get_valptr()) -= __n;  }
         void _M_set_size(size_type __n) {  (*this->_M_Base_Node.get_valptr()) = __n;  }
-
     public:
         _STL_USE_CONSTEXPR _List_Base() : _M_Base_Node() {  }
         ~_List_Base() = default;
@@ -325,6 +329,7 @@ namespace stl{
         void reverse();
         void sort();
 
+        void swap(list& _Other);
         /// Iterator Function
         iterator begin() {  return iterator (this->_M_Base_Node._M_next);  }
         iterator end()  {  return iterator (&this->_M_Base_Node);  }
@@ -522,6 +527,7 @@ namespace stl{
     void list<_Tp, _Alloc>::_M_move_Node(__std__::_List_Base<_Tp, _Alloc>&& _Tar) {
         if (std::addressof(_Tar) == std::addressof(*this))
             return;
+        /// If this specific list is empty !
         if (_Tar._M_Base_Node._M_next == &_Tar._M_Base_Node)
             this->_M_empty_initialized();
         else{
@@ -530,7 +536,7 @@ namespace stl{
             this->_M_Base_Node._M_next->_M_prev = this->_M_Base_Node._M_prev->_M_next = &this->_M_Base_Node;
             this->_M_set_size(_Tar._M_get_size());
 
-            /// Set Move Object to be Destructive
+            /// Set Move Object to be Destructive Status
             _Tar._M_Base_Node._M_next = &_Tar._M_Base_Node;
             _Tar._M_Base_Node._M_prev = &_Tar._M_Base_Node;
             _Tar._M_set_size(0);
@@ -682,7 +688,14 @@ namespace stl{
     void list<_Tp, _Alloc>::sort() {
         this->_M_List_Sort();
     }
-
+    template<typename _Tp, typename _Alloc>
+    void list<_Tp, _Alloc>::swap(list&_Other){
+        if (std::addressof(*this) != std::addressof(_Other)){
+           list __buffer = __STL_GCC_MOVE(*this);
+           *this = __STL_GCC_MOVE(_Other);
+           _Other = __STL_GCC_MOVE(__buffer);
+        }
+    }
     /// List Can't Use Standard Algorithm sort
     /// Use Special Handled list::sort
     /// Kernel Sort Way Is Merge Sort
@@ -708,12 +721,14 @@ namespace stl{
                 __compare.splice(__compare.begin(), *this, this->begin());
             __buffer.merge(__compare);
         }
-        *this = __buffer;
+        *this = std::move(__buffer);
         /// TODO Update Sort Version To Sync Wit Standard Library !!!
 #else
 
 #endif
     }
+    /// Operator =
+
     /// Use Highly Effective Way To Copy Or Move
     /// Not Supported Yet
 #ifdef USE_AMENDMENT_OPERATOR_EQUAL
@@ -724,6 +739,7 @@ namespace stl{
     list<_Tp, _Alloc>& list<_Tp, _Alloc>::operator=(const list<_Tp, _Alloc> &_Other) {
     }
 #endif
+
     /// Use Common Way That Deallocate Source Object Directly !
 #ifdef USE_SIMPLE_OPERATOR_EQUAL
     template<typename _Tp, typename _Alloc>
@@ -736,5 +752,6 @@ namespace stl{
         this->template _M_Copy(_Other.begin(), _Other.end());
     }
 #endif
+
 }
 #endif //STL2_0_STL_LIST_H

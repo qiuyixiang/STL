@@ -494,6 +494,15 @@ namespace sequence_container_test{
             stl::list<int>group = {2,5,1,3,4,8,7,9};
             group.sort();
             group.display();
+            std::cout<<BREAK<<std::endl;
+
+            stl::list<int>list3 = {3,6,8,7,2,3,4,9,8,1};
+            list3.sort();
+            list3.display();
+            stl::list<int>list4 = {1,1,1};
+            list4.swap(list3);
+            list4.display();
+            list3.display();
         }
     }
 
