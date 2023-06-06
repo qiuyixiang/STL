@@ -557,6 +557,7 @@ namespace sequence_container_test{
             list3.assign(list4.begin(), list4.end());
             list3.display(true);
             list4.display(true);
+            /// Example
             list1.reverse();
             list1.remove(10);
             std::cout<<BREAK<<std::endl;
@@ -564,6 +565,67 @@ namespace sequence_container_test{
             list5.display(true);
             list5.reverse();
             list5.display(true);
+            stl::list<int>list6 = {1,1,2,2,3,4,5,3};
+            list6.display(true);
+            list6.remove(3);
+            list6.display(true);
+        }
+        void forward_list_test_unit3(){
+            std::forward_list<int>forwardList{1,2,3,4,5,6,7};
+            std::forward_list<int>forwardList1{1,2,3};
+            auto Iter = forwardList1.begin();
+            std::advance(Iter, 2);
+            auto Iter_s = forwardList.begin();
+            std::advance(Iter_s, 2);
+            auto _Iter = forwardList.begin();
+            std::advance(_Iter, 5);
+            forwardList1.splice_after(Iter, forwardList, Iter_s, _Iter);
+            DISPLAY_DBG(forwardList);
+            DISPLAY_DBG(forwardList1);
+            std::cout<<BREAK<<std::endl;
+            stl::forward_list<int>forwardList2{1,2,3,4,5,6,7};
+            stl::forward_list<int>forwardList3{1,2,3};
+
+            forwardList2.display(true);
+            forwardList3.display(true);
+            std::cout<<BREAK<<std::endl;
+            auto _pos = stl::forward_list<int>::advance(forwardList3.begin(), 2);
+            auto _before = stl::forward_list<int>::advance(forwardList2.begin(), 2);
+            auto _last = stl::forward_list<int>::advance(forwardList2.begin(), 5);
+            //  std::cout<<*_last<<std::endl;
+            forwardList3.splice_after(_pos, forwardList2, _before, _last);
+            forwardList2.display(true);
+            forwardList3.display(true);
+            std::cout<<BREAK<<std::endl;
+
+            stl::forward_list<int>forwardList4 = {1,2,3,4,5,6};
+            stl::forward_list<int>forwardList5;
+            if (forwardList5.begin() == stl::forward_list<int>::iterator(nullptr))
+                std::cout<<"NUll"<<std::endl;
+            forwardList5.splice_after(forwardList5.before_begin(), forwardList4);
+            forwardList5.display(true);
+            forwardList4.display(true);
+            std::cout<<BREAK<<std::endl;
+            stl::forward_list<int>forwardList6 = {1,2,3,4,5,6};
+            stl::forward_list<int>forwardList7;
+            forwardList7.splice_after(forwardList7.before_begin(), forwardList6, forwardList6.begin());
+            forwardList6.display(true);
+            forwardList7.display(true);
+        }
+        void forward_list_test_unit4(){
+            std::forward_list<int>forwardList;
+            ///forwardList.merge();
+            forwardList.unique();
+            stl::forward_list<int>forwardList1 = {1,1,1,2,3,3,3,4,4,5,5,6,6};
+            forwardList1.display(true);
+            forwardList1.unique();
+            forwardList1.display(true);
+            std::cout<<BREAK<<std::endl;
+            stl::forward_list<int>forwardList2 = {1,2,3,4,7,8};
+            stl::forward_list<int>forwardList3 = {1,2,3,5,6,6,9,10,11};
+            forwardList2.merge(forwardList3);
+            forwardList2.display(true);
+            forwardList3.display(true);
         }
     }
 
@@ -592,6 +654,8 @@ int main(int argc, char ** argv){
     ///sequence_container_test::list_test::list_test_unit4();
 
     ///sequence_container_test::forward_list_test::forward_list_test_unit1();
-    sequence_container_test::forward_list_test::forward_list_test_unit2();
+    ///sequence_container_test::forward_list_test::forward_list_test_unit2();
+    ///sequence_container_test::forward_list_test::forward_list_test_unit3();
+    sequence_container_test::forward_list_test::forward_list_test_unit4();
     return 0;
 }

@@ -543,6 +543,7 @@ namespace stl{
             _Tar._M_set_size(0);
         }
     }
+    /// Default to be ordered !
     template<typename _Tp, typename _Alloc>
     void list<_Tp, _Alloc>::unique() {
         if (this->empty() || (this->size() == 1))

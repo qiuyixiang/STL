@@ -21,7 +21,6 @@ namespace stl{
     /// typedef for forward list iterator
     template<typename _Tp>
     using forward_list_iterator = __std__::__fwd_list_iterator<_Tp>;
-
 }
 
 #endif //STL2_0_FORWARD_LIST_H

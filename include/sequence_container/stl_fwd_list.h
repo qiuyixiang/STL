@@ -235,6 +235,7 @@ namespace stl{
         typedef const _Tp&                                const_reference;
         typedef _Tp *                                     pointer;
         typedef const _Tp *                               const_pointer;
+        typedef stl::ptrdiff_t                            difference_type;
         typedef typename __std__::__fwd_list_base<_Tp, _Alloc>
         ::size_type size_type;
 
@@ -246,6 +247,7 @@ namespace stl{
         /// Private Utility Member Function
         template<typename BidirectionalIterator>
         void _M_copy(BidirectionalIterator _first, BidirectionalIterator _last);
+        void transfer_after(const_iterator _pos, iterator __before, iterator __last);
 
     public:
         /// Constructor
@@ -307,8 +309,13 @@ namespace stl{
         void unique() _STL_NO_EXCEPTION;
         void sort();
         void remove(const value_type& _val);
-        void merge();
-        void splice_after();
+        void merge(_fwd_list& __other);
+
+        void splice_after(const_iterator __pos, _fwd_list&, iterator __before, iterator __last);
+        void splice_after(const_iterator __pos, _fwd_list& __other);
+        void splice_after(const_iterator __pos, _fwd_list& __other, iterator __before);
+
+        static iterator advance(iterator _Iter, difference_type __dif);
 
         /// Public Member Function For Iterator
         iterator begin() _STL_NO_EXCEPTION {
@@ -506,28 +513,109 @@ namespace stl{
     void _fwd_list<_Tp, _Alloc>::assign(std::initializer_list<value_type> &_Li) {
         this->template _M_copy(_Li.begin(), _Li.end());
     }
-    /// TODO Implementation of reverse() double pointer !
+    /// Implementation of reverse() double pointer !
     template<typename _Tp, typename _Alloc>
     void _fwd_list<_Tp, _Alloc>::reverse() noexcept {
-
+        /*TODO  Later After Finish Algorithm Segment !*/
 
     }
     template<typename _Tp, typename _Alloc>
     void _fwd_list<_Tp, _Alloc>::sort() {
-
+        /// TODO Finish sort algorithm
+    }
+    /// Default to be ordered !
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::unique() noexcept {
+        if (!this->empty()){
+            iterator __current = this->begin();
+            while (__current._M_Next_Iter() != this->end()){
+                iterator __del = __current._M_Next_Iter();
+                if (*__current == *__del)
+                    this->erase_after(__current);
+                else
+                    ++__current;
+            }
+        }
     }
     template<typename _Tp, typename _Alloc>
     void _fwd_list<_Tp, _Alloc>::remove(const value_type &_val) {
-
+        if (!this->empty()){
+            auto __current = this->before_begin();
+            while (auto __del = __current._M_Next_Iter()){
+                if (*__del == _val)
+                    this->erase_after(__del);
+                else
+                    ++__current;
+            }
+        }
     }
     template<typename _Tp, typename _Alloc>
-    void _fwd_list<_Tp, _Alloc>::merge() {
-
+    void _fwd_list<_Tp, _Alloc>::merge(_fwd_list& __other) {
+        if (__other.empty() )
+            return;
+        auto __destination = __other.before_begin();
+        auto __current = this->before_begin();
+        /// Judgement That Next Iterator Is Not nullptr !
+        while (__current._M_Next_Iter() != this->end() &&
+        __destination._M_Next_Iter()!= __other.end()){
+            if (*(__destination._M_Next_Iter()) <= *(__current._M_Next_Iter()))
+                this->splice_after(__current, __other, __destination);
+            else
+                ++__current;
+        }
+        if (__current._M_Next_Iter() == this->end() &&
+        __destination._M_Next_Iter() != __other.end())
+            this->splice_after(__current, __other, __destination, __other.end());
+        __other._M_head._M_next = nullptr;
+    }
+    /// Splice : (__before, __last) Sync With C++ Standard Library !
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::
+    splice_after(const_iterator __pos, _fwd_list&, iterator __before, iterator __last) {
+        iterator __end = __before;
+        iterator __temp;
+        while (true){
+            if (__end != __last){
+                __temp = __end;
+            } else
+                break;
+            ++__end;
+        }
+        this->transfer_after(__pos, __before, __temp);
     }
     template<typename _Tp, typename _Alloc>
-    void _fwd_list<_Tp, _Alloc>::splice_after() {
-
+    void _fwd_list<_Tp, _Alloc>::splice_after(const_iterator __pos, _fwd_list<_Tp, _Alloc> &__other) {
+        this->splice_after(__pos, __other, this->before_begin(), this->end());
     }
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::
+    splice_after(const_iterator __pos, _fwd_list<_Tp, _Alloc> &__other,iterator __before) {
+        auto __next = __before;
+        ++++__next;
+        this->splice_after(__pos, __other, __before, __next);
+    }
+    template<typename _Tp, typename _Alloc>
+    typename _fwd_list<_Tp, _Alloc>::iterator _fwd_list<_Tp, _Alloc>::advance(iterator _Iter, difference_type __dif) {
+        auto __current = _Iter;
+        stl::advance(__current, __dif);
+        return __current;
+    }
+    /// transfer [__before + 1, __last]
+    /// As (__before, __last] Contains __last
+    /// And behind of _pos
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::transfer_after(const_iterator __pos, iterator __before, iterator __last) {
+        /// The position that splice from
+        iterator __first = __before._M_Next_Iter();
+        /// Do Transfer Operation
+        if (__last.base()->_M_next != nullptr)
+            __before.base()->_M_next = __last.base()->_M_next;
+        else
+            __before.base()->_M_next = nullptr;
+        __last.base()->_M_next = __pos.base()->_M_next ;
+        __pos.base()->_M_next = __first.base();
+    }
+
     /// Global Swap For forward_list
     template<typename _Tp, typename _Alloc>
     void swap(_fwd_list<_Tp, _Alloc>& __l, _fwd_list<_Tp, _Alloc>& __r){
