@@ -45,7 +45,7 @@
 
 /// Debugger Option
 ///#define DEBUGGER
-#define VECTOR_DBG
+///#define VECTOR_DBG
 ///#define LIST_MEMORY_DEBUGGER
 
 #include <iostream>
@@ -539,6 +539,31 @@ namespace sequence_container_test{
             stl::forward_list<int>list = {1,2,3,4,5,6,7,8};
             list.clear();
             list.display(true);
+            std::forward_list<int>list1 = {1,2,3,4,5,6};
+            std::forward_list<int>list2({1,2,3,4,5,6});
+            list1 = list2;
+            std::cout<<BREAK<<std::endl;
+
+            stl::forward_list<int>group = {1,2,3,4,5,6,7};
+            stl::forward_list<int>group1(std::move(group));
+            group1.display(true);
+            group.display(true);
+            group.swap(group1);
+            group.display(true);
+            group1.display(true);
+            std::cout<<BREAK<<std::endl;
+            stl::forward_list<int>list3;
+            stl::forward_list<int>list4 = {1,2,3,4,5,6};
+            list3.assign(list4.begin(), list4.end());
+            list3.display(true);
+            list4.display(true);
+            list1.reverse();
+            list1.remove(10);
+            std::cout<<BREAK<<std::endl;
+            stl::forward_list<int>list5 = {1,2,3,4,5,6,7,8};
+            list5.display(true);
+            list5.reverse();
+            list5.display(true);
         }
     }
 

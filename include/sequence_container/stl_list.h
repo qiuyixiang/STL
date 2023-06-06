@@ -702,6 +702,7 @@ namespace stl{
     /// Kernel Sort Way Is Merge Sort
     template<typename _Tp, typename _Alloc>
     void list<_Tp, _Alloc>::_M_List_Sort() {
+        /// TODO Update sort() to standard version
         /// Merge Sort !
 
         /// Old Version Of Sort This Version is not

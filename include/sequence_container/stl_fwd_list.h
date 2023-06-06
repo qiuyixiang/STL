@@ -24,6 +24,8 @@
 #include "../util/utility.h"
 #include "../iterator/iterator_traits.h"
 
+/// TODO List  implementation reverse
+
 namespace __std__{
 
     /// Base Node For _fwd_list_node !
@@ -242,14 +244,22 @@ namespace stl{
 
     private:
         /// Private Utility Member Function
-        template<typename ForwardIterator>
-        void _M_copy(ForwardIterator _first, ForwardIterator _last);
+        template<typename BidirectionalIterator>
+        void _M_copy(BidirectionalIterator _first, BidirectionalIterator _last);
 
     public:
         /// Constructor
         _STL_USE_CONSTEXPR _fwd_list() : _Base() {  };
         _fwd_list(const std::initializer_list<value_type>&_Li) : _Base()
         { this->template _M_copy(_Li.begin(), _Li.end());  }
+
+        /// Copy And Move Constructor
+        /// Recommend To Use Move Operator To Increase Efficiency !
+        _fwd_list(const _fwd_list& __other);
+        _fwd_list(_fwd_list&& __other);
+
+        _fwd_list& operator=(const _fwd_list& __other);
+        _fwd_list& operator=(_fwd_list&& __other);
 
         /// Destructor
         ~_fwd_list(){
@@ -286,7 +296,19 @@ namespace stl{
 
         void clear();
         void display(bool debugger = false) const;
+        void swap(_fwd_list& __other);
 
+        template<typename InputIterator>
+        void assign(InputIterator __first, InputIterator __last);
+
+        void assign(std::initializer_list<value_type>& _Li);
+
+        void reverse() _STL_NO_EXCEPTION;
+        void unique() _STL_NO_EXCEPTION;
+        void sort();
+        void remove(const value_type& _val);
+        void merge();
+        void splice_after();
 
         /// Public Member Function For Iterator
         iterator begin() _STL_NO_EXCEPTION {
@@ -365,12 +387,12 @@ namespace stl{
         this->template emplace_after(this->before_begin(), std::forward<_Args>(args)...);
     }
     template<typename _Tp, typename _Alloc>
-    template<typename ForwardIterator>
-    void _fwd_list<_Tp, _Alloc>::_M_copy(ForwardIterator _first, ForwardIterator _last) {
+    template<typename BidirectionalIterator>
+    void _fwd_list<_Tp, _Alloc>::_M_copy(BidirectionalIterator _first, BidirectionalIterator _last) {
         /// Copy Reversely
         /// Copy [_last, _first) In Other Word is [__first, __last);
-        ForwardIterator __first = --_last;
-        ForwardIterator __last = --_first;
+        BidirectionalIterator __first = --_last;
+        BidirectionalIterator __last = --_first;
         while (__first != __last)
             this->template emplace_front(*__first--);
     }
@@ -424,6 +446,92 @@ namespace stl{
             this->_destroy_node(static_cast<Node_type*>(__del.base()));
         }
         this->_M_head._M_next = nullptr;
+    }
+    /// Copy And Move Operator
+    template<typename _Tp, typename _Alloc>
+    _fwd_list<_Tp, _Alloc>& _fwd_list<_Tp, _Alloc>::
+    operator=(_fwd_list&& __other) {
+        /// Deal With Self-Assignment !
+        if (std::addressof(*this) != std::addressof(__other)){
+            this->_M_head._M_next = __other._M_head._M_next;
+            __other._M_head._M_next = nullptr;
+        }
+    }
+    template<typename _Tp, typename _Alloc>
+    _fwd_list<_Tp, _Alloc>& _fwd_list<_Tp, _Alloc>::
+    operator=(const _fwd_list<_Tp, _Alloc> &__other) {
+        /// Low Efficiency !  O(n)
+
+        if (std::addressof(*this) != &__other){
+            /// Clear Old List
+            this->clear();
+            /// push_front at begin_before position
+            this->template assign(__other.begin(), __other.end());
+        }
+    }
+    /// Copy And Move Constructor
+    template<typename _Tp, typename _Alloc>
+    _fwd_list<_Tp, _Alloc>::
+    _fwd_list(const _fwd_list<_Tp, _Alloc> &__other) :_Base() {
+        /// push_front at begin_before position
+        this->template assign(__other.begin(), __other.end());
+    }
+    template<typename _Tp, typename _Alloc>
+    _fwd_list<_Tp, _Alloc>::
+    _fwd_list(_fwd_list &&__other) :_Base() {
+        this->_M_head._M_next = __other._M_head._M_next;
+        __other._M_head._M_next = nullptr;
+    }
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::swap(_fwd_list&__other) {
+        stl::swap(this->_M_head._M_next, __other._M_head._M_next);
+    }
+    template<typename _Tp, typename _Alloc>
+    template<typename InputIterator>
+    void _fwd_list<_Tp, _Alloc>::assign(InputIterator __first, InputIterator __last) {
+        if (!this->empty())
+            this->clear();
+        const size_type __size = stl::distance(__first, __last);
+        /// Set a Buffer to Transfer Element !
+        /// TODO Replace stl::vector to stl::array to Buffer !
+        stl::vector<_Tp, _Alloc>__buffer(__size);
+        /// Copy From Buffer
+        for (size_type  __index = 0 ; __first != __last; ++__first)
+            __buffer[__index++] = *__first;
+
+        this->template _M_copy(__buffer.begin(), __buffer.end());
+    }
+
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::assign(std::initializer_list<value_type> &_Li) {
+        this->template _M_copy(_Li.begin(), _Li.end());
+    }
+    /// TODO Implementation of reverse() double pointer !
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::reverse() noexcept {
+
+
+    }
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::sort() {
+
+    }
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::remove(const value_type &_val) {
+
+    }
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::merge() {
+
+    }
+    template<typename _Tp, typename _Alloc>
+    void _fwd_list<_Tp, _Alloc>::splice_after() {
+
+    }
+    /// Global Swap For forward_list
+    template<typename _Tp, typename _Alloc>
+    void swap(_fwd_list<_Tp, _Alloc>& __l, _fwd_list<_Tp, _Alloc>& __r){
+        __l.swap(__r);
     }
 }
 #endif //STL2_0_STL_FWD_LIST_H
