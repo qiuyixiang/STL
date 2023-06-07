@@ -64,6 +64,7 @@
 #include "include/vector.h"
 #include "include/list.h"
 #include "include/forward_list.h"
+#include "include/array.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -629,6 +630,28 @@ namespace sequence_container_test{
         }
     }
 
+    namespace array_test{
+        void array_test_unit1(){
+            std::array<int, 0>array;
+            array.fill(10);
+
+            std::cout<<std::boolalpha<<array.empty()<<std::endl;
+            int arrays[10] = {1,2,3,4,5,6};
+            std::cout<<"OVER"<<std::endl;
+            std::cout<<BREAK<<std::endl;
+            stl::array<int, 10>array1;
+            array1.fill(100);
+            array1.display(true);
+            std::cout<<array1.back()<<std::endl;
+            std::cout<<array1.front()<<std::endl;
+            std::cout<<array1.at(0)<<std::endl;
+            stl::array<int, 10>array2;
+            array1.swap(array2);
+            array2.display(true);
+            array1.display(true);
+        }
+    }
+
 }
 int main(int argc, char ** argv){
 
@@ -656,6 +679,8 @@ int main(int argc, char ** argv){
     ///sequence_container_test::forward_list_test::forward_list_test_unit1();
     ///sequence_container_test::forward_list_test::forward_list_test_unit2();
     ///sequence_container_test::forward_list_test::forward_list_test_unit3();
-    sequence_container_test::forward_list_test::forward_list_test_unit4();
+    ///sequence_container_test::forward_list_test::forward_list_test_unit4();
+
+    sequence_container_test::array_test::array_test_unit1();
     return 0;
 }
