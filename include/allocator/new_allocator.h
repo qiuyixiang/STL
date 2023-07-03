@@ -27,7 +27,7 @@ namespace stl{
         typedef const _Tp*                  const_pointer;
         typedef const _Tp&                  const_reference;
         typedef stl::size_t                 size_type;
-        typedef new_allocator<value_type>       allocator_type;
+        typedef new_allocator<value_type>   allocator_type;
 
         template<typename _Tp1>
         struct rebind{

@@ -15,12 +15,17 @@
  * New allocator Standard
  */
 namespace stl{
+    /// Type Define For New Standard Allocator
     template<typename _Tp>
     using allocator = stl::new_allocator<_Tp>;
 
-    template<typename _Tp>
-    using alloc = stl::pool_allocator<_Tp>;
+    /// type Define For Pool allocator !
+    using alloc = __std__::__pool_alloc_base;
 
+    template<typename _Tp>
+    using pool_allocator = __std__::__pool_alloc<_Tp>;
+
+    /// Type Define For Allocator Traits !
     template<typename _Alloc>
     using allocator_traits = stl::__allocator_traits<_Alloc>;
 }

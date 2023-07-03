@@ -197,7 +197,7 @@ namespace __std__{
     template<typename _Tp, typename _Alloc>
     void __fwd_list_base<_Tp, _Alloc>::_put_node(Node_type *__ptr) {
         if (__ptr)
-            this->get_allocator().deallocate(__ptr);
+            this->get_allocator().deallocate(__ptr, 1);
     }
     template<typename _Tp, typename _Alloc>
     void __fwd_list_base<_Tp, _Alloc>::_destroy_node(Node_type *__ptr) {

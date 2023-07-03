@@ -361,7 +361,7 @@ namespace stl{
     }
     template<typename _Tp, typename _Alloc>
     void list<_Tp,  _Alloc>::_M_free_Node(list_node_type *_Tar) {
-        this->get_allocator().deallocate(_Tar);
+        this->get_allocator().deallocate(_Tar, 1);
     }
     template<typename _Tp, typename _Alloc>
     typename list<_Tp,  _Alloc>::list_node_type * list<_Tp,  _Alloc>::_M_create_Node(const value_type &_Val) {

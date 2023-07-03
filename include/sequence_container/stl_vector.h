@@ -86,10 +86,10 @@ namespace __std__{
             return __n != 0 ? _Ac ::allocate(this->_M_imp, __n) : pointer();
         }
 
-        void _M_deallocate(pointer __p, size_type){
+        void _M_deallocate(pointer __p, size_type __n){
             if (__p){
                 typedef stl::__allocator_traits<_Rebind_Alloc_type> _Ac;
-                _Ac ::deallocate(this->_M_imp, __p);
+                _Ac ::deallocate(this->_M_imp, __p, __n);
             }
         }
         /// This Function Create Storage but not initialize

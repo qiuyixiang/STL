@@ -32,6 +32,14 @@ namespace stl{
     }
 
 
+    /// round_up  round up to 8  2^n
+    _STL_USE_UTILITY_INLINE stl::size_t round_up(size_t _size){
+        /// Disassemble The Operation
+        /// & -8  last three bit set to 0
+        return (((_size) + 7) & (-8));
+        ///return (((_size) + 8 - 1) & ~( 8 - 1));
+    }
+
     /// Pair Implementation
     template<typename _Arg1, typename _Arg2>
     struct pair {
@@ -128,6 +136,8 @@ namespace stl{
     (const pair<_Tp1, _Tp2>& __l, const pair<_Tp1, _Tp2>& __r){
         return __l.first > __r.first || (__l.first == __r.first && __l.second > __r.second);
     }
+
+
 
 }
 #endif //STL2_0_UTILITY_H

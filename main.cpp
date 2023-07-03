@@ -56,6 +56,8 @@
 #include <deque>
 #include <list>
 #include <forward_list>
+#include <bitset>
+#include <ext/pool_allocator.h>
 
 #include "include/iterator.h"
 #include "include/memory.h"
@@ -65,6 +67,7 @@
 #include "include/list.h"
 #include "include/forward_list.h"
 #include "include/array.h"
+#include "include/allocator/pool_allocator.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -118,6 +121,17 @@ namespace construct_test_unit{
 }
 namespace allocator_test_unit{
 
+    struct Without_Union{
+        int Num;
+        int * _ptr;
+    };
+    struct With_Union {
+        enum { align = 100 };
+        union {
+            int Num;
+            int * _ptr;
+        };
+    };
     void new_allocator_test(){
         ///std::allocator<int> allocator;
         int number = 100;
@@ -130,6 +144,92 @@ namespace allocator_test_unit{
 
         typedef stl::allocator_traits<stl::allocator<int>>::rebind_alloc<double> rebindAllocType;
         rebindAllocType alloc;
+    }
+    void pool_allocator_test1(){
+        std::cout<< sizeof(Without_Union)<<std::endl;
+        std::cout<< sizeof(With_Union)<<std::endl;
+        With_Union withUnion;
+        std::cout<<&withUnion<<std::endl;
+        std::cout<<withUnion._ptr<<std::endl;
+        std::cout<<withUnion.Num<<std::endl;
+        stl::pool_allocator<int>poolAllocator;
+        std::cout<< sizeof(poolAllocator)<<std::endl;
+        ///poolAllocator._check_static_data();
+    }
+
+    template<typename _Tp>
+    using gnu_alloc = __gnu_cxx::__pool_alloc<_Tp>;
+
+    class Alloc_class_{
+    private:
+        int * _ptr;
+    public:
+        Alloc_class_() : _ptr(nullptr) {
+            std::cout<<"Alloc class Constructor !"<<std::endl;
+        };
+        ~Alloc_class_() {
+            std::cout<<"Alloc class Destructor !"<<std::endl;
+            delete _ptr;
+        }
+    };
+    void pool_allocator_test2(){
+        ///std::cout<< sizeof(int )<<std::endl;
+        POOL_ALLOC_ADD_QU
+        int * int_ptr = reinterpret_cast<int*>(stl::alloc ::__allocate(4));
+        POOL_ALLOC_ADD_QU
+        stl::alloc::__allocate(16);
+        POOL_ALLOC_ADD_QU
+        stl::alloc::__allocate(32);
+        POOL_ALLOC_ADD_QU
+        stl::alloc::__allocate(64);
+        POOL_ALLOC_ADD_QU
+        stl::alloc::__allocate(8);
+        POOL_ALLOC_ADD_QU
+        void * _temp = stl::alloc::__allocate(16);
+        POOL_ALLOC_ADD_QU
+        stl::alloc::__deallocate(_temp, 16);
+        POOL_ALLOC_ADD_QU
+        stl::alloc::__allocate(32);
+        POOL_ALLOC_ADD_QU
+    }
+    void pool_allocator_test3(){
+        int *_ptr = reinterpret_cast<int *>(stl::alloc::__allocate(4));
+        std::cout<<*_ptr<<std::endl;
+        std::cout<<*(_ptr + 1)<<std::endl;
+        std::cout<<*(_ptr + 2)<<std::endl;
+        std::cout<<*(_ptr + 3)<<std::endl;
+        std::cout<<*(_ptr + 4)<<std::endl;
+        std::cout<<*(_ptr + 5)<<std::endl;
+    }
+    void pool_allocator_test4(){
+        stl::vector<int, stl::pool_allocator<int>>vector1 = {1,2,3,4,5,6,7,8};
+        //vector1.push_back(10);
+        vector1.display();
+        POOL_ALLOC_ADD_QU
+        stl::list<int, stl::pool_allocator<int>>list = {1,2,3,4,5};
+        list.display();
+        POOL_ALLOC_ADD_QU
+        stl::forward_list<int, stl::pool_allocator<int>>forwardList = {1,2,3,4,5,7,0,3,4,2,3,4,2,3};
+        std::cout<<forwardList._size()<<std::endl;
+        POOL_ALLOC_ADD_QU
+        stl::vector<int, stl::pool_allocator<int>>vector2 = {1,2,3,4,5,6,7,8,9,10};
+        POOL_ALLOC_ADD_QU
+        stl::vector<int, stl::pool_allocator<int>>vector3 = {1,2,3,4,5};
+        POOL_ALLOC_ADD_QU
+    }
+    class __pl : public __gnu_cxx::__pool_alloc_base{
+    public:
+        static void __pl_heap(){
+            std::cout<<__gnu_cxx::__pool_alloc_base::_S_heap_size<<std::endl;
+        }
+    };
+    void pool_allocator_test5(){
+        std::vector<int, gnu_alloc<int>>vector1 = {1,2,3,4,5,6,7,8};
+        //vector1.push_back(10);
+        std::list<int, gnu_alloc<int>>list = {1,2,3,4,5};
+        std::forward_list<int, gnu_alloc<int>>forwardList = {1,2,3,4,5,7,0,3,4,2,3,4,2,3};
+        std::vector<int, gnu_alloc<int>>vector2 = {1,2,3,4,5,6,7,8,9,10};
+        __pl::__pl_heap();
     }
 }
 namespace functor_test{
@@ -178,7 +278,6 @@ namespace iterator_test{
         for ( ; reverseIterator2 != reverseIterator3; ++reverseIterator2)
             std::cout<<*reverseIterator2<<" ";
         std::cout<<std::endl;
-
     }
 
     void stream_iterator_test(){
@@ -207,6 +306,20 @@ namespace utility_test{
         stl::pair<int, int>pair2 = stl::make_pair(20, 20);
         stl::swap(pair1, pair2);
         std::cout<<pair2.first<<" "<<pair2.second<<std::endl;
+    }
+
+    void round_up_test(){
+        std::cout<<(~7)<<std::endl;
+        std::cout<<(~( 8 - 1))<<std::endl;
+        std::cout<<std::bitset<4>((~7))<<std::endl;
+        std::cout<<stl::round_up(30)<<std::endl;
+        std::cout<<(30 & 8)<<std::endl;
+        std::cout<<BREAK<<std::endl;
+        std::cout<<stl::round_up(12)<<std::endl;
+        std::cout<<stl::round_up(15)<<std::endl;
+        std::cout<<stl::round_up(19)<<std::endl;
+        std::cout<<stl::round_up(55)<<std::endl;
+        std::cout<<stl::round_up(8)<<std::endl;
     }
 }
 
@@ -656,14 +769,27 @@ namespace sequence_container_test{
 int main(int argc, char ** argv){
 
     ///memory_test_unit::_memory_test_unit();
+
     ///construct_test_unit::construct_test();
+
     ///allocator_test_unit::new_allocator_test();
+    ///allocator_test_unit::pool_allocator_test1();
+    ///allocator_test_unit::pool_allocator_test2();
+    ///allocator_test_unit::pool_allocator_test3();
+    ///allocator_test_unit::pool_allocator_test4();
+    ///allocator_test_unit::pool_allocator_test5();
+
     ///construct_test_unit::uninitialized_test();
+
     ///functor_test::functor_test();
+
     ///iterator_test::inserter_iterator_test();
     ///iterator_test::reverse_iterator_test();
     ///iterator_test::stream_iterator_test();
+
     ///utility_test::pair_test();
+    ///utility_test::round_up_test();
+
     ///functor_test::functor_mem_test();
 
     ///sequence_container_test::vector_test::vector_test_unit1();
@@ -681,6 +807,6 @@ int main(int argc, char ** argv){
     ///sequence_container_test::forward_list_test::forward_list_test_unit3();
     ///sequence_container_test::forward_list_test::forward_list_test_unit4();
 
-    sequence_container_test::array_test::array_test_unit1();
+    ///sequence_container_test::array_test::array_test_unit1();
     return 0;
 }

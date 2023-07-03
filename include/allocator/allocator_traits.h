@@ -49,6 +49,7 @@ namespace stl{
         /// allocator traits for static member function
         static inline pointer allocate(allocator_type& __alloc, size_type __n);
         static inline void deallocate(allocator_type& __alloc, pointer __p);
+        static inline void deallocate(allocator_type& __alloc, pointer __p, size_type __n);
 
         template<typename _alloc, typename _Up, typename... _Args>
         static auto construct(_alloc& __alloc, _Up * __p, _Args&& ...__args)
@@ -74,5 +75,10 @@ namespace stl{
     void __allocator_traits<_Alloc>::deallocate(allocator_type &__alloc, pointer __p) {
         __alloc.deallocate(__p);
     }
+    template<typename _Alloc>
+    void __allocator_traits<_Alloc>::deallocate(allocator_type &__alloc, pointer __p, size_type __n) {
+        __alloc.deallocate(__p, __n);
+    }
+
 }
 #endif //STL2_0_ALLOCATOR_TRAITS_H
