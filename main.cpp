@@ -762,8 +762,11 @@ namespace sequence_container_test{
     ///test for deque
     namespace deque_test{
         void deque_test_unit1(){
+            std::deque<int>empty_de;
             std::deque<int>deque(10, 10);
+            deque[23];
             std::deque<int>deque3 {1,2,3,4,5,6,7,8};
+            deque3.push_back(100);
             std::cout<<(-10 / 8)<<std::endl;
             std::cout<<(-10 % 8)<<std::endl;
 
@@ -797,6 +800,29 @@ namespace sequence_container_test{
             std::cout<<*(__iter - 4)<<std::endl;
             __iter -= 4;
             std::cout<<*(__iter - 4)<<std::endl;
+            std::cout<<BREAK<<std::endl;
+            stl::deque<int, stl::default_allocator<int>, 8>deque6{1,2,3,4,5,6,7,8,9,10};
+            std::cout<<*(deque6.end() - 1)<<std::endl;
+        }
+        void deque_test_unit2(){
+            std::cout<<BREAK<<std::endl;
+            stl::deque<int, stl::default_allocator<int>, 4>deque;
+            deque.push_back(10);
+            deque.display(true);
+
+            deque.push_back(20);
+            deque.display(true);
+
+            deque.push_back(30);
+            deque.display(true);
+
+            deque.push_back(40);
+            auto Iter = deque.end() - 1;
+            /// Error Here
+            std::cout<<Iter.__current<<std::endl;
+            std::cout<<(++Iter).__current<<std::endl;
+            //deque.display(true);
+
         }
     }
 }
@@ -843,6 +869,7 @@ int main(int argc, char ** argv){
 
     ///sequence_container_test::array_test::array_test_unit1();
 
-    sequence_container_test::deque_test::deque_test_unit1();
+    ///sequence_container_test::deque_test::deque_test_unit1();
+    sequence_container_test::deque_test::deque_test_unit2();
     return 0;
 }
