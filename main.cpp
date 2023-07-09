@@ -68,6 +68,7 @@
 #include "include/forward_list.h"
 #include "include/array.h"
 #include "include/allocator/pool_allocator.h"
+#include "include/deque.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -497,11 +498,6 @@ namespace sequence_container_test{
         }
     }
 
-    /// test for deque
-    namespace deque_test{
-
-    }
-
     /// test for list
     namespace list_test{
         void list_test_unit1(){
@@ -621,7 +617,6 @@ namespace sequence_container_test{
             list3.display();
         }
     }
-
     ///test for forward_list
     namespace forward_list_test{
         void forward_list_test_unit1(){
@@ -764,7 +759,46 @@ namespace sequence_container_test{
             array1.display(true);
         }
     }
+    ///test for deque
+    namespace deque_test{
+        void deque_test_unit1(){
+            std::deque<int>deque(10, 10);
+            std::deque<int>deque3 {1,2,3,4,5,6,7,8};
+            std::cout<<(-10 / 8)<<std::endl;
+            std::cout<<(-10 % 8)<<std::endl;
 
+            stl::deque<int>deque1;
+            stl::deque<int>deque2(10, 10);
+            deque2.display(true);
+            std::cout<<deque2.front()<<std::endl;
+            std::cout<<deque2.back()<<std::endl;
+            std::cout<<std::endl;
+            stl::deque<int>deque4 {1,2,3,4,5,6,7,8,9,10};
+            deque4.display(true);
+            std::cout<<BREAK<<std::endl;
+
+            stl::deque<int, stl::default_allocator<int>, 8>deque5 {1,2,3,4,5,6,7,8,9,10
+            ,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25};
+            deque5.display(true);
+            auto __iter = deque5.begin() + 2;
+            std::cout<<*__iter<<std::endl;
+            __iter += 1;
+            std::cout<<*__iter<<std::endl;
+            __iter += 6;
+            std::cout<<*__iter<<std::endl;
+            __iter += 10;
+            std::cout<<*__iter<<std::endl;
+            __iter += 5;
+            std::cout<<*__iter<<std::endl;
+            if ((__iter + 1) == deque5.end())
+                std::cout<<"Equal !"<<std::endl;
+            std::cout<<*(__iter - 22)<<std::endl;
+            std::cout<<*(__iter - 12)<<std::endl;
+            std::cout<<*(__iter - 4)<<std::endl;
+            __iter -= 4;
+            std::cout<<*(__iter - 4)<<std::endl;
+        }
+    }
 }
 int main(int argc, char ** argv){
 
@@ -808,5 +842,7 @@ int main(int argc, char ** argv){
     ///sequence_container_test::forward_list_test::forward_list_test_unit4();
 
     ///sequence_container_test::array_test::array_test_unit1();
+
+    sequence_container_test::deque_test::deque_test_unit1();
     return 0;
 }
