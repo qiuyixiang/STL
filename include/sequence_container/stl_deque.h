@@ -107,6 +107,8 @@ namespace __std__{
             _STL_USE_CONSTEXPR _deque_iterator() _STL_NO_EXCEPTION : __current(nullptr), __fist(nullptr),
             __node(nullptr), __last(nullptr){  };
             ~_deque_iterator() {  }
+            _STL_USE_CONSTEXPR _deque_iterator(const _deque_iterator<_Tp, _BufferSize>& _other) :
+            __current(_other.__current), __fist(_other.__fist), __node(_other.__node), __last(_other.__last) {  };
 
             reference operator*() const {  return *__current;  }
             pointer operator->() const {  return &(operator*()); }
@@ -183,6 +185,14 @@ namespace __std__{
 
             reference operator[](difference_type __n)  {
                 return *(*this + __n);
+            }
+            self & operator=(const _deque_iterator<_Tp, _BufferSize>& __other) {
+                if (this != &__other){
+                    this->__current = __other.__current;
+                    this->__node = __other.__node;
+                    this->__fist = __other.__fist;
+                    this->__last = __other.__last;
+                }
             }
             bool operator==(const self& __other) const {  return this->__current == __other.__current; }
             bool operator!=(const self& __other) const {  return !(*this == __other); }
@@ -294,6 +304,14 @@ namespace stl{
         inline _buffer_map_type _M_allocate_Node();
         inline void _M_deallocate_Node(_buffer_map_type __ptr);
 
+        void _M_pop_back_auxiliary();
+        void _M_pop_front_auxiliary();
+        void _M_clear_and_reserve_one();
+
+        iterator _M_erase_auxiliary(iterator __first, iterator __last);
+        template<typename ...Args>
+        iterator _M_insert_auxiliary(iterator __position, Args&&...args);
+
     public:
         /// Public Member Function
 
@@ -309,6 +327,15 @@ namespace stl{
 
         deque(std::initializer_list<value_type> _l) : deque() {
             this->template _M_copy_initialized(_l.begin(), _l.end());
+        }
+        /// Destroy Deque Completely !
+        ~deque() {
+            /// Delete All Buffer Node
+            if (!this->empty())
+                this->_M_clear_and_reserve_one();
+            this->_M_deallocate_Node(this->_M_start.__fist);
+            /// Delete All Buffer
+            this->get_node_type_allocator().deallocate(this->_M_buffer_map, this->_M_buffer_size);
         }
 
         /// Begin()  End()
@@ -349,6 +376,18 @@ namespace stl{
 
         template<typename... Args>
         void emplace_front(Args&&...args);
+
+        void pop_back();
+        void pop_front();
+        void clear();
+
+        iterator erase(iterator position);
+        iterator erase(iterator first, iterator last);
+
+        iterator insert(iterator position, const value_type& value);
+        iterator insert(iterator position, value_type&& value);
+        template<typename ...Args>
+        iterator emplace(iterator position, Args&&...args);
     };
 
     /// The Achievement OF Deque's Member Function
@@ -438,7 +477,7 @@ namespace stl{
     }
     template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
     void deque<_Tp, _Alloc,  _BufferSize>::push_back(const value_type &value) {
-        if (this->_M_finish.__current != this->_M_finish.__last){
+        if (this->_M_finish.__current != this->_M_finish.__last - 1){
             stl::_Construct(this->_M_finish.__current, value);
             ++this->_M_finish.__current;
         } else
@@ -447,7 +486,7 @@ namespace stl{
     template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
     template<typename ...Args>
     void deque<_Tp, _Alloc,  _BufferSize>::emplace_back(Args&&...args) {
-        if (this->_M_finish.__current != this->_M_finish.__last){
+        if (this->_M_finish.__current != this->_M_finish.__last - 1){
             stl::_Construct(this->_M_finish.__current, std::forward<Args>(args)...);
             ++this->_M_finish.__current;
         } else
@@ -461,19 +500,15 @@ namespace stl{
     template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
     template<typename ...Args>
     void deque<_Tp, _Alloc,  _BufferSize>::_M_emplace_back_auxiliary(Args &&...__val) {
-        std::cout<<"kuo rong"<<std::endl;
         /// Reverse One Node At Back!
         this->_M_reserve_node_back();
         *(this->_M_finish.__node + 1) = this->_M_allocate_Node();
         try {
+            stl::_Construct(this->_M_finish.__current, std::forward<Args>(__val)...);
             this->_M_finish.set_node(this->_M_finish.__node + 1);
             this->_M_finish.__current = this->_M_finish.__fist;
-            stl::_Construct(this->_M_finish.__current, std::forward<Args>(__val)...);
-            ++this->_M_finish.__current;
         } catch (...) {
-            /// Catch Exception , Destroy __Current And Deallocate New Allocated Memory !
-            this->_M_finish.set_node(this->_M_finish.__node - 1);
-            this->_M_finish.__current = this->_M_finish.__last;
+            /// Catch Exception Deallocate New Allocated Memory !
             this->_M_deallocate_Node(*(this->_M_finish.__node + 1));
             throw ;
         }
@@ -489,7 +524,7 @@ namespace stl{
             stl::_Construct(this->_M_start.__current - 1, value);
             --this->_M_start.__current;
         } else
-            this->template _M_emplace_back_auxiliary(value);
+            this->template _M_emplace_front_auxiliary(value);
     }
     template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
     template<typename ...Args>
@@ -498,7 +533,7 @@ namespace stl{
             stl::_Construct(this->_M_start.__current - 1, std::forward<Args>(args)...);
             --this->_M_start.__current;
         } else
-            this->template _M_emplace_back_auxiliary(std::forward<Args>(args)...);
+            this->template _M_emplace_front_auxiliary(std::forward<Args>(args)...);
     }
     template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
     void deque<_Tp, _Alloc,  _BufferSize>::_M_reserve_node_front(size_type __node_to_add) {
@@ -562,6 +597,177 @@ namespace stl{
     void deque<_Tp, _Alloc,  _BufferSize>::_M_deallocate_Node(_buffer_map_type __ptr) {
         this->get_Tp_type_allocator().deallocate
         (__ptr, __std__::_deque_iterator<_Tp, _BufferSize>::buffer_size());
+    }
+    /// Pop Function Implementation
+    /// The Standard Of Invoking __auxiliary is whether The Node Can Deallocate
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    void deque<_Tp, _Alloc,  _BufferSize>::pop_back() {
+        if (this->_M_finish.__current != this->_M_finish.__fist){
+            --this->_M_finish.__current;
+            stl::_Destroy(this->_M_finish.__current);
+            ///if (this->_M_finish.__current == this->_M_finish.__fist)
+            /// NO Element At This Node Buffer Just As A End Flag !
+        } else
+            this->_M_pop_back_auxiliary();
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    void deque<_Tp, _Alloc,  _BufferSize>::_M_pop_back_auxiliary() {
+        this->_M_deallocate_Node(this->_M_finish.__fist);
+        this->_M_finish.set_node(this->_M_finish.__node - 1);
+        this->_M_finish.__current = this->_M_finish.__last - 1;
+        stl::_Destroy(this->_M_finish.__current);
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    void deque<_Tp, _Alloc,  _BufferSize>::pop_front() {
+        if (this->_M_start.__current != this->_M_start.__last - 1){
+            stl::_Destroy(this->_M_start.__current);
+            ++this->_M_start.__current;
+            /// The Last One Of Element At The Node !
+        } else
+            this->_M_pop_front_auxiliary();
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    void deque<_Tp, _Alloc,  _BufferSize>::_M_pop_front_auxiliary() {
+        stl::_Destroy(this->_M_start.__current);
+        this->_M_deallocate_Node(this->_M_start.__fist);
+        this->_M_start.set_node(this->_M_start.__node + 1);
+        this->_M_start.__current = this->_M_start.__fist;
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    void deque<_Tp, _Alloc,  _BufferSize>::clear() {
+        this->_M_clear_and_reserve_one();
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    void deque<_Tp, _Alloc,  _BufferSize>::_M_clear_and_reserve_one() {
+        /// Clear Buffer But Reverse One Buffer Node As Original !
+
+        /// Clear All Filled Buffer
+        for (_buffer_map_pointer __Del = this->_M_start.__node + 1 ;
+        __Del < this->_M_finish.__node; ++__Del){
+            stl::_Destroy(*__Del, *__Del + __std__::_deque_iterator<_Tp, _BufferSize>::buffer_size());
+            this->_M_deallocate_Node(*__Del);
+        }
+        /// Clear The Rest (Head And Tail)
+        /// First Node != Last Node
+        if (this->_M_start.__node != this->_M_finish.__node){
+            stl::_Destroy(this->_M_start.__current, this->_M_start.__last);
+            stl::_Destroy(this->_M_finish.__fist, this->_M_finish.__current);
+            /// Reverse First Node As Buffer Node !
+            this->_M_deallocate_Node(this->_M_finish.__fist);
+        } else{
+            /// First Node And Last Node in Same Buffer !
+            stl::_Destroy(this->_M_start.__current, this->_M_finish.__current);
+        }
+        this->_M_finish = this->_M_start;
+    }
+    /// Consider Deque As A Liner Sequence !
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    typename deque<_Tp, _Alloc,  _BufferSize>::iterator
+    deque<_Tp, _Alloc,  _BufferSize>::erase(iterator position) {
+        iterator __erase_after = position;
+        ++__erase_after;
+        difference_type __diff_front = position - this->_M_start;
+        /// this->size() >> 1  =  this->size() / 2
+        if (__diff_front < (this->size() >> 1) ){
+            std::copy_backward(this->_M_start, position, __erase_after);
+            /// Pop Spare Element !
+            this->pop_front();
+        } else{
+            std::copy(__erase_after, this->_M_finish, position);
+            /// Pop Spare Element !
+            this->pop_back();
+        }
+        return iterator(this->_M_start + __diff_front);
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    typename deque<_Tp, _Alloc,  _BufferSize>::iterator
+    deque<_Tp, _Alloc,  _BufferSize>::erase(iterator first, iterator last) {
+        if (first == this->_M_start && last == this->_M_finish) {
+            this->clear();
+            return this->_M_finish;
+        }
+        else
+            return this->_M_erase_auxiliary(first, last);
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    typename deque<_Tp, _Alloc,  _BufferSize>::iterator
+    deque<_Tp, _Alloc,  _BufferSize>::_M_erase_auxiliary(iterator __first, iterator __last) {
+        difference_type __n = __last - __first;
+        difference_type __elems_front = __first - this->_M_start;
+        difference_type __elems_back = this->_M_finish - __last;
+        if (__elems_front < __elems_back){
+            std::copy_backward(this->_M_start, __first, __last);
+            iterator __new_start = this->_M_start + __n;
+            stl::_Destroy(this->_M_start, __new_start);
+            for (_buffer_map_pointer __cur = this->_M_start.__node; __cur < __new_start.__node; ++ __cur)
+                this->_M_deallocate_Node(*__cur);
+            this->_M_start = __new_start;
+        } else{
+            std::copy(__last, this->_M_finish, __first);
+            iterator __new_finish = this->_M_finish - __n;
+            stl::_Destroy(__new_finish, this->_M_finish);
+            for (_buffer_map_pointer __cur = __new_finish.__node + 1; __cur <= this->_M_finish.__node; ++__cur)
+                this->_M_deallocate_Node(*__cur);
+            this->_M_finish = __new_finish;
+        }
+        return this->_M_start + __elems_front;
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    typename deque<_Tp, _Alloc,  _BufferSize>::iterator
+    deque<_Tp, _Alloc,  _BufferSize>::insert(iterator position, const value_type &value) {
+        if (position.__current == this->_M_start.__current){
+            this->push_front(value);
+            return this->_M_start;
+        } else if (position.__current == this->_M_finish.__current){
+            this->push_back(value);
+            iterator __temp = _M_finish;
+            --__temp;
+            return __temp;
+        } else
+            return this->template _M_insert_auxiliary(position, value);
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    typename deque<_Tp, _Alloc,  _BufferSize>::iterator
+    deque<_Tp, _Alloc,  _BufferSize>::insert(iterator position, value_type &&value) {
+        return this->template emplace(position, std::move(value));
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    template<typename...Args>
+    typename deque<_Tp, _Alloc,  _BufferSize>::iterator
+    deque<_Tp, _Alloc,  _BufferSize>::emplace(iterator position, Args&&...args) {
+        if (position.__current == this->_M_start.__current){
+            this->template emplace_front(std::forward<Args>(args)...);
+            return this->_M_start;
+        } else if (position.__current == this->_M_finish.__current){
+            this->template emplace_back(std::forward<Args>(args)...);
+            iterator __temp = _M_finish;
+            --__temp;
+            return __temp;
+        } else
+            return this->template _M_insert_auxiliary(position, std::forward<Args>(args)...);
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    template<typename...Args>
+    typename deque<_Tp, _Alloc,  _BufferSize>::iterator
+    deque<_Tp, _Alloc,  _BufferSize>::_M_insert_auxiliary(iterator __position, Args&&...args) {
+        difference_type __diff_front = __position - this->_M_start;
+        value_type X_copy(std::forward<Args>(args)...);
+
+        if (__diff_front < this->size() / 2){
+            iterator __new_position = __position - 1;
+            iterator old_start = this->_M_start;
+            this->push_front(this->front());
+            std::copy(old_start, __position, this->_M_start);
+            *__new_position = std::move(X_copy);
+            return __new_position;
+        } else{
+            iterator __new_position = __position + 1;
+            iterator old_finish = this->_M_finish;
+            this->push_back(this->back());
+            std::copy_backward(__position, old_finish, this->_M_finish);
+            *__position = std::move(X_copy);
+            return __position;
+        }
     }
 }
 #endif //STL2_0_STL_DEQUE_H

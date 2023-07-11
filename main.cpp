@@ -821,8 +821,52 @@ namespace sequence_container_test{
             /// Error Here
             std::cout<<Iter.__current<<std::endl;
             std::cout<<(++Iter).__current<<std::endl;
-            //deque.display(true);
+            deque.display(true);
+            std::cout<<BREAK<<std::endl;
 
+            stl::deque<int, stl::default_allocator<int>, 4>deque1;
+            deque1.push_back(10);
+            deque1.push_back(20);
+            deque1.push_back(30);
+            deque1.push_back(40);
+            deque1.display(true);
+            deque1.push_back(50);
+            deque1.display(true);
+            deque1.push_front(9);
+            deque1.push_front(8);
+            deque1.push_front(7);
+            deque1.push_front(6);
+            deque1.display(true);
+            deque1.push_front(5);
+            deque1.display(true);
+            deque1.pop_back();
+            deque1.pop_back();
+            deque1.display(true);
+            deque1.pop_front();
+            deque1.pop_front();
+            deque1.display(true);
+            deque1.clear();
+            deque1.display(true);
+        }
+        void deque_test_unit3(){
+            stl::deque<int, stl::default_allocator<int>, 4>deque{1,2,3,4,5,6,7,8,9,10};
+            deque.display(true);
+            deque.erase(deque.begin() + 4);
+            deque.display(true);
+            deque.erase(deque.begin() + 3, deque.begin()+6);
+            deque.display(true);
+            ///deque1.insert(10);
+            auto iter = deque.insert(deque.begin() + 3, 4);
+            deque.display(true);
+            std::cout<<*iter<<std::endl;
+            deque.insert(deque.begin() + 1, 2);
+            deque.display(true);
+            deque.insert(deque.end() - 1, 9);
+            deque.display(true);
+            deque.insert(deque.end() - 1, 10);
+            deque.display(true);
+            deque.insert(deque.end() - 4, 8);
+            deque.display(true);
         }
     }
 }
@@ -870,6 +914,7 @@ int main(int argc, char ** argv){
     ///sequence_container_test::array_test::array_test_unit1();
 
     ///sequence_container_test::deque_test::deque_test_unit1();
-    sequence_container_test::deque_test::deque_test_unit2();
+    ///sequence_container_test::deque_test::deque_test_unit2();
+    sequence_container_test::deque_test::deque_test_unit3();
     return 0;
 }
