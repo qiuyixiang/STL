@@ -56,6 +56,7 @@
 #include <deque>
 #include <list>
 #include <forward_list>
+#include <stack>
 #include <bitset>
 #include <ext/pool_allocator.h>
 
@@ -915,6 +916,6 @@ int main(int argc, char ** argv){
 
     ///sequence_container_test::deque_test::deque_test_unit1();
     ///sequence_container_test::deque_test::deque_test_unit2();
-    sequence_container_test::deque_test::deque_test_unit3();
+    ///sequence_container_test::deque_test::deque_test_unit3();
     return 0;
 }
