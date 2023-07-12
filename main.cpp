@@ -868,6 +868,24 @@ namespace sequence_container_test{
             deque.display(true);
             deque.insert(deque.end() - 4, 8);
             deque.display(true);
+            std::deque<int>group1 = {1,2,3,4,5,6,7,8};
+            std::deque<int>group2 = {1,2,3,4,5,6,7,8};
+            std::deque<int>group3;
+            group3 = std::move(group2);
+            std::cout<<std::boolalpha<<(group1 <= group2)<<std::endl;
+        }
+        void deque_test_unit4(){
+            stl::deque<int, stl::default_allocator<int>, 4>deque{1,2,3,4,5,6,7,8,9};
+            stl::deque<int, stl::default_allocator<int>, 4>deque1(std::move(deque));
+            deque.display(true);
+            deque1.display(true);
+            std::cout<<BREAK<<std::endl;
+            stl::deque<int, stl::default_allocator<int>, 4>deque2;
+            deque2 = deque1;
+            deque1.display(true);
+            deque2.display(true);
+
+            std::cout<<std::boolalpha<<(deque1 == deque2)<<std::endl;
         }
     }
 }
@@ -917,5 +935,6 @@ int main(int argc, char ** argv){
     ///sequence_container_test::deque_test::deque_test_unit1();
     ///sequence_container_test::deque_test::deque_test_unit2();
     ///sequence_container_test::deque_test::deque_test_unit3();
+    sequence_container_test::deque_test::deque_test_unit4();
     return 0;
 }

@@ -14,6 +14,20 @@
 /// stl::deque on 2023-7-7
 /// Double Ended Queue belong to Sequence Container !
 
+
+/**
+ * This Container Is Used As Double Ended Queue
+ * It's Liner In Logical !
+ * Advanced Sequence stl::deque !
+ *
+ * Fist Version Finished on : 2023-7-11
+ *
+ * Small Patch 0.1: Copy And Move Constructor,
+ *              Assignment And Operator==
+ *              Finished On 2023-7-12
+ */
+
+///#define DEQUE_DESTROY_DEBUGGER
 namespace __std__{
 
 
@@ -99,6 +113,12 @@ namespace __std__{
                 this->__node = __new_node;
                 this->__fist = *__new_node;
                 this->__last = this->__fist + difference_type (buffer_size());
+            }
+            void set_mem_null(){
+                this->__current = nullptr;
+                this->__node = nullptr;
+                this->__fist = nullptr;
+                this->__last = nullptr;
             }
     public:
             /// Public Member Function
@@ -333,10 +353,28 @@ namespace stl{
             /// Delete All Buffer Node
             if (!this->empty())
                 this->_M_clear_and_reserve_one();
-            this->_M_deallocate_Node(this->_M_start.__fist);
-            /// Delete All Buffer
-            this->get_node_type_allocator().deallocate(this->_M_buffer_map, this->_M_buffer_size);
+            if (this->_M_start.__fist != nullptr && this->_M_buffer_map != nullptr){
+                this->_M_deallocate_Node(this->_M_start.__fist);
+                /// Delete All Buffer
+                this->get_node_type_allocator().deallocate(this->_M_buffer_map, this->_M_buffer_size);
+            } else{
+#ifdef DEQUE_DESTROY_DEBUGGER
+                std::cout<<"Doing Nothing !"<<std::endl;
+#endif
+            }
         }
+
+        /// Copy And Move Constructor
+        deque(const deque<_Tp, _Alloc, _BufferSize>& __other) : _M_buffer_map(nullptr), _M_buffer_size(0),
+        _M_finish(), _M_start() {
+            this->template _M_copy_initialized(__other.begin(), __other.end());
+        }
+
+        deque(deque&& __other);
+
+        /// Copy And Move Assignment Operator
+        deque& operator=(const deque<_Tp, _Alloc, _BufferSize>& __other);
+        deque& operator=(deque<_Tp, _Alloc, _BufferSize>&& __other);
 
         /// Begin()  End()
         iterator begin() _STL_NO_EXCEPTION {  return this->_M_start; }
@@ -768,6 +806,78 @@ namespace stl{
             *__position = std::move(X_copy);
             return __position;
         }
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    deque<_Tp, _Alloc,  _BufferSize>::deque(deque &&__other)
+    : _M_buffer_map(__other._M_buffer_map), _M_buffer_size(__other._M_buffer_size),
+    _M_finish(__other._M_finish), _M_start(__other._M_start) {
+        __other._M_start.set_mem_null();
+        __other._M_finish.set_mem_null();
+        __other._M_buffer_size = 0;
+        __other._M_buffer_map = nullptr;
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    deque<_Tp, _Alloc,  _BufferSize>& deque<_Tp, _Alloc,  _BufferSize>::
+    operator=(const deque<_Tp, _Alloc, _BufferSize> &__other) {
+        if (this != &__other){
+            if (!this->empty())
+                this->_M_clear_and_reserve_one();
+            if (this->_M_start.__fist != nullptr && this->_M_buffer_map != nullptr){
+                this->_M_deallocate_Node(this->_M_start.__fist);
+                /// Delete All Buffer
+                this->get_node_type_allocator().deallocate(this->_M_buffer_map, this->_M_buffer_size);
+            }
+            this->template _M_copy_initialized(__other.begin(), __other.end());
+        }
+        return *this;
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    deque<_Tp, _Alloc,  _BufferSize>& deque<_Tp, _Alloc,  _BufferSize>::
+    operator=(deque<_Tp, _Alloc, _BufferSize> &&__other) {
+        if (this != &__other){
+            if (!this->empty())
+                this->_M_clear_and_reserve_one();
+            if (this->_M_start.__fist != nullptr && this->_M_buffer_map != nullptr){
+                this->_M_deallocate_Node(this->_M_start.__fist);
+                /// Delete All Buffer
+                this->get_node_type_allocator().deallocate(this->_M_buffer_map, this->_M_buffer_size);
+            }
+            this->_M_start = __other._M_start;
+            this->_M_finish = __other._M_finish;
+            this->_M_buffer_size = __other._M_buffer_size;
+            this->_M_buffer_map = __other._M_buffer_map;
+
+            __other._M_start.set_mem_null();
+            __other._M_finish.set_mem_null();
+            __other._M_buffer_size = 0;
+            __other._M_buffer_map = nullptr;
+        }
+        return *this;
+    }
+    /// TODO Replace Main Compare Function
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    bool operator==(const deque<_Tp, _Alloc, _BufferSize>&__x, const deque<_Tp, _Alloc, _BufferSize>&__y){
+        return (__x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin()));
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    bool operator!=(const deque<_Tp, _Alloc, _BufferSize>&__x, const deque<_Tp, _Alloc, _BufferSize>&__y){
+        return !(__x == __y);
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    bool operator<(const deque<_Tp, _Alloc, _BufferSize>&__x, const deque<_Tp, _Alloc, _BufferSize>&__y){
+        return std::lexicographical_compare(__x.begin(), __x.end(), __y.begin(), __y.end());
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    bool operator>(const deque<_Tp, _Alloc, _BufferSize>&__x, const deque<_Tp, _Alloc, _BufferSize>&__y){
+        return __y < __x;
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    bool operator>=(const deque<_Tp, _Alloc, _BufferSize>&__x, const deque<_Tp, _Alloc, _BufferSize>&__y){
+        return !(__x < __y);
+    }
+    template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
+    bool operator<=(const deque<_Tp, _Alloc, _BufferSize>&__x, const deque<_Tp, _Alloc, _BufferSize>&__y){
+        return !(__x > __y);
     }
 }
 #endif //STL2_0_STL_DEQUE_H
