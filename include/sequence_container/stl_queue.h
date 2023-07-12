@@ -28,6 +28,7 @@ namespace stl{
         template<typename _Tp1, typename _Sequence1>
         friend bool operator<(const queue<_Tp1, _Sequence1>& __x, const queue<_Tp1, _Sequence1>& __y);
     protected:
+        /// Just As Adapter !
         _Sequence _M_I_sequence;
 
     public:
