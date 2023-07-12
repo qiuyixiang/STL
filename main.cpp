@@ -900,6 +900,7 @@ namespace sequence_container_test{
             std::cout<<stack.top()<<std::endl;
             stl::stack<int>stack1;
             std::cout<<std::boolalpha<<(stack == stack1)<<std::endl;
+            ///std::priority_queue<int>;
         }
     }
 }

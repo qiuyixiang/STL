@@ -6,6 +6,7 @@
 #define STL2_0_STL_QUEUE_H
 
 #include "./stl_deque.h"
+#include "./stl_heap.h"
 
 namespace stl{
 
