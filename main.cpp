@@ -57,6 +57,7 @@
 #include <list>
 #include <forward_list>
 #include <stack>
+#include <queue>
 #include <bitset>
 #include <ext/pool_allocator.h>
 
@@ -68,8 +69,9 @@
 #include "include/list.h"
 #include "include/forward_list.h"
 #include "include/array.h"
-#include "include/allocator/pool_allocator.h"
+#include "include/stack.h"
 #include "include/deque.h"
+#include "include/queue.h"
 
 namespace memory_test_unit{
     void my_new_handler(){
@@ -888,6 +890,18 @@ namespace sequence_container_test{
             std::cout<<std::boolalpha<<(deque1 == deque2)<<std::endl;
         }
     }
+    namespace stack_test{
+        void stack_test_unit1(){
+            ///std::stack<int>stack {1,2,3,4,5,6,7};
+            stl::stack<int>stack;
+            stack.display(true);
+            stack.push(100);
+            stack.display(true);
+            std::cout<<stack.top()<<std::endl;
+            stl::stack<int>stack1;
+            std::cout<<std::boolalpha<<(stack == stack1)<<std::endl;
+        }
+    }
 }
 int main(int argc, char ** argv){
 
@@ -935,6 +949,8 @@ int main(int argc, char ** argv){
     ///sequence_container_test::deque_test::deque_test_unit1();
     ///sequence_container_test::deque_test::deque_test_unit2();
     ///sequence_container_test::deque_test::deque_test_unit3();
-    sequence_container_test::deque_test::deque_test_unit4();
+    ///sequence_container_test::deque_test::deque_test_unit4();
+
+    sequence_container_test::stack_test::stack_test_unit1();
     return 0;
 }

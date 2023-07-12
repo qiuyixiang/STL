@@ -401,7 +401,7 @@ namespace stl{
         reference front();
         reference back();
 
-        void display(bool debug = false);
+        void display(bool debug = false) const;
 
         void push_back(value_type&& value);
         void push_back(const value_type& value);
@@ -442,7 +442,7 @@ namespace stl{
         return *__temp;
     }
     template<typename _Tp, typename _Alloc, stl::size_t _BufferSize>
-    void deque<_Tp, _Alloc,  _BufferSize>::display(bool debug) {
+    void deque<_Tp, _Alloc,  _BufferSize>::display(bool debug) const {
         for (__std__::_deque_iterator<_Tp, _BufferSize> __iter = this->begin(); __iter != this->end(); ++__iter)
             std::cout<<*__iter<<" ";
         std::cout<<std::endl;
